@@ -1,37 +1,37 @@
 ## Goal
 
-Store PRD Volume 4 (User Journey 03 — Analysis Dashboard) as project memory and cross-link it with Volumes 1–3. No code, no components, no UI. Memory writes need your approval first, since plan mode blocks all file writes.
+Store PRD Volume 6 (WebLens Intelligence) as project memory and cross-link it with Volumes 1–5. No code, no components, no UI. Memory writes need approval first, since plan mode blocks file writes.
 
 ## Step 1 — New memory file
 
-Create `mem://features/analysis-dashboard.md` (type: feature) capturing Volume 4:
+Create `mem://features/weblens-intelligence.md` (type: feature) capturing Volume 6:
 
-- **Objective** — the heart of WebLens AI; feels like a premium AI consultant, not a spreadsheet; every section tells a story; logical sequence over information dump; encourages exploration
-- **Layout order** — Website Preview → Overall Score → Summary Cards → Detailed Analysis → Recommendations → Export Report
-- **Website preview** — large browser mockup, URL above, small refresh + share icons, soft rounded corners, premium shadow
-- **Overall score** — large animated circular score (e.g. 91 / Excellent), fills 0→final over 1s, emerald gradient, small glow, never flashy
-- **Quick summary** — four equal cards: Design, Performance, SEO, Accessibility; each with icon, score, status, short description; animate one after another
-- **Design review** — Visual Hierarchy, Typography, Spacing, Color Consistency, Navigation, CTA Visibility; each card: score, status, strengths, areas to improve; smooth expand
-- **Performance review** — Loading, Images, JavaScript, CSS, Caching, Animations; each row: status, score, recommendation
-- **SEO review** — Meta Title, Meta Description, Headings, Image Alt Text, Internal Links, Open Graph, Structured Data, Sitemap; each: Pass / Warning / Needs Attention
-- **Accessibility** — Keyboard Navigation, Contrast, Focus States, Alt Text, Readable Fonts, Screen Reader Support; each explains why it matters
-- **Business review** (unique feature) — Homepage Clarity, CTA, Trust Signals, Testimonials, Pricing, Contact Visibility, FAQ, About Page, Navigation Simplicity; each scored
-- **Recommendations** — last section, grouped High / Medium / Low priority; each has title, description, expected impact, estimated difficulty; cards actionable (e.g. "Improve CTA Button — Impact High, Difficulty Easy, 15 Minutes"); expand smoothly at 300ms, never jump
-- **Export** — Download PDF, Copy Report, Share Report; identical styling; hover soft lift + soft glow
-- **Floating navigation** — scroll progress indicator with Overview, Design, Performance, SEO, Accessibility, Business, Recommendations; active section auto-highlights
-- **Scroll animations** — sections fade upward, cards sequential, charts draw themselves, numbers count up, nothing appears instantly
-- **Empty state** — elegant illustration, how-to explanation, Analyze Website button
-- **Error state** — friendly explanation, Retry, Edit URL, Support link
-- **Mobile** — vertical stack, charts resize, swipeable cards, floating nav becomes bottom nav, large buttons
-- **Accessibility & performance** — keyboard nav, visible focus, screen-reader labels, reduced motion, large touch targets; 60 FPS, lazy load lower sections, avoid unnecessary rendering
-- **Emotional goal** — feels like a professional consultation; encourages curiosity and continued exploration
+- **Objective** — signature feature; turns raw analysis into business advice; feels like an experienced UX consultant, not a warning list; user instantly sees what matters, why, what to fix first, and the likely impact
+- **Position** — appears after all technical analysis sections in the dashboard (understand first, then guidance)
+- **Section header** — title "WebLens Intelligence", subtitle "Prioritized insights based on your website analysis."; premium and distinct
+- **Intelligence overview** — three summary cards: Top Opportunity, Quick Win, Greatest Strength; each with icon, short title, one-sentence explanation
+- **Priority levels** — Critical / High / Medium / Low, colored from the design system; no alarming colors, stays professional
+- **Recommendation structure** — Title, Short Summary, Why This Matters, Business Impact, Estimated Difficulty, Estimated Time, Priority Badge, Recommended Next Step
+- **Business impact wording** — outcomes not tech: improve user trust, increase conversion potential, reduce visitor confusion, strengthen brand credibility, improve mobile usability, increase search visibility; concise
+- **Difficulty** — Very Easy / Easy / Moderate / Advanced; never numeric complexity scores
+- **Time estimates** — 5 Minutes, 15 Minutes, 30 Minutes, 1 Hour, Half Day, Several Days; estimates only
+- **Why This Matters** — plain-language consultant explanation, no jargon (example: CTA blends into surroundings, contrast helps visitors find where to click)
+- **Action checklist** — short items per recommendation (increase button contrast, add spacing, improve heading hierarchy, simplify nav labels, check mobile layout)
+- **Confidence indicator** — Very High / High / Medium / Low per recommendation
+- **Positive reinforcement** — celebrate strengths alongside issues (typography consistency, branding, responsive behavior, navigation clarity, color palette); balance builds trust
+- **Learning cards** — small educational tips between sections (why accessibility matters, why hierarchy improves usability, why speed affects conversions)
+- **Future AI compatibility** — UI stays independent of the intelligence engine; rule-based today, AI models later, no redesign required
+- **Empty state** — "Insights will appear after a successful website analysis." plus Analyze Website button
+- **Mobile** — vertical stacking, badges stay visible, checklist readable, comfortable spacing
+- **Accessibility & performance** — keyboard nav, readable type, screen-reader labels, reduced motion, contrast; progressive loading, smooth animation, avoid unnecessary rendering
+- **Emotional goal** — "this tool understands my website"; the defining feature of WebLens AI
 
 ## Step 2 — Cross-link volumes
 
-- Header note in the new file: Volume 1 = design system, Volume 2 = landing, Volume 3 = analysis experience, Volume 4 = this dashboard; all visuals inherit Volume 1 tokens, and this journey continues where Volume 3's dashboard build-in sequence ends.
-- Add a forward pointer in `mem://features/analysis-experience.md` to Volume 4.
+- Header note in the new file: Volume 1 = design system, Volume 2 = landing, Volume 3 = analysis experience, Volume 4 = dashboard, Volume 5 = report, Volume 6 = this Intelligence section; visuals inherit Volume 1 tokens; it renders inside the Volume 4 dashboard after the technical sections and feeds the Volume 5 report's insights.
+- Add forward pointers in `mem://features/analysis-dashboard.md` and `mem://features/report-experience.md`.
 - Add the new entry under Memories in `mem://index.md`.
 
 ## Out of scope
 
-No dashboard page, components, routes, styles, charts, or backend work. Awaiting Volume 5.
+No intelligence UI, components, routes, styles, or backend/AI work. Awaiting Volume 7.
