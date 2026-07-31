@@ -214,6 +214,18 @@
   --sidebar-ring: oklch(0.72 0.14 163);
 }
 
+/*
+ * Motion scale (PRD Volume 7). Components reference these tokens instead of
+ * hardcoding durations so timing stays consistent across the product.
+ */
+:root {
+  --motion-micro: 180ms;
+  --motion-component: 300ms;
+  --motion-section: 600ms;
+  --motion-page: 900ms;
+  --motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -243,4 +255,72 @@
     outline-offset: 2px;
   }
 }
+
+@utility motion-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity var(--motion-section) var(--motion-ease),
+    transform var(--motion-section) var(--motion-ease);
+  will-change: opacity, transform;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes weblens-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@utility motion-shake {
+  animation: weblens-shake 500ms var(--motion-ease);
+}
+
+@keyframes weblens-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) scale(1.04);
+  }
+}
+
+@utility motion-drift {
+  animation: weblens-drift 18s var(--motion-ease) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .motion-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 
