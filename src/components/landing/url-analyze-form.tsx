@@ -65,8 +65,8 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
         onSubmit={handleSubmit}
         noValidate
         className={cn(
-          "flex w-full flex-col gap-2 rounded-2xl border bg-card p-2 shadow-card transition-[border-color,box-shadow] duration-(--motion-component) ease-(--motion-ease) sm:flex-row sm:items-center sm:rounded-full sm:pl-5",
-          error ? "border-destructive/50" : "border-border focus-within:border-primary focus-within:shadow-lifted",
+          "flex w-full flex-col gap-2 rounded-2xl border bg-card p-2.5 shadow-card transition-[border-color,box-shadow] duration-(--motion-component) ease-(--motion-ease) sm:flex-row sm:items-center sm:rounded-full sm:pl-6",
+          error ? "border-destructive/50" : "border-border focus-within:border-primary/60 focus-within:shadow-lifted",
           shake && "motion-shake",
         )}
       >
@@ -90,13 +90,13 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
             }}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? "website-url-error" : "website-url-helper"}
-            className="min-h-11 w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="min-h-13 w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none sm:min-h-14"
           />
         </div>
         <Button
           type="submit"
           size="lg"
-          className="min-h-12 gap-2 rounded-xl px-6 shadow-soft transition-all duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-card active:translate-y-0 active:scale-[0.95] sm:rounded-full"
+          className="min-h-13 gap-2 rounded-xl px-7 text-[0.95rem] font-semibold shadow-glow-soft transition-[transform,box-shadow,filter] duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-glow hover:brightness-[1.03] active:translate-y-0 active:scale-[0.97] sm:min-h-14 sm:rounded-full"
         >
           Analyze Website
           <ArrowRight aria-hidden="true" className="size-4" />

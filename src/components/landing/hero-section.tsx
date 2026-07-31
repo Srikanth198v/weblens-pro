@@ -26,7 +26,7 @@ export function HeroSection({
 
         <Reveal delay={80}>
           <h1 className="mx-auto max-w-[20ch] text-balance text-4xl leading-[1.08] font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Analyze your website like a professional agency
+            Turn your website into a high-performing digital experience
           </h1>
         </Reveal>
 

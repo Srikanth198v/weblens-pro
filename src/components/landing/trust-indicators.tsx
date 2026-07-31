@@ -1,9 +1,9 @@
-import { Crosshair, Lock, Zap, type LucideIcon } from "lucide-react";
+import { Crosshair, ShieldCheck, Zap, type LucideIcon } from "lucide-react";
 
 const INDICATORS: { icon: LucideIcon; label: string }[] = [
-  { icon: Zap, label: "Fast Analysis" },
-  { icon: Lock, label: "Secure" },
-  { icon: Crosshair, label: "Actionable Insights" },
+  { icon: Zap, label: "Results in under a minute" },
+  { icon: ShieldCheck, label: "Private and secure — no sign-up" },
+  { icon: Crosshair, label: "Clear, expert-level recommendations" },
 ];
 
 export function TrustIndicators() {
