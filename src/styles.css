@@ -70,6 +70,8 @@
   --shadow-soft: var(--elevation-soft);
   --shadow-card: var(--elevation-card);
   --shadow-lifted: var(--elevation-lifted);
+  --shadow-glow-soft: var(--elevation-glow-soft);
+  --shadow-glow: var(--elevation-glow);
 }
 
 :root {
@@ -121,6 +123,13 @@
   --elevation-lifted:
     0 2px 4px 0 oklch(0.24 0.021 257 / 0.04),
     0 18px 40px -16px oklch(0.24 0.021 257 / 0.16);
+  --elevation-glow-soft:
+    0 1px 2px 0 oklch(0.24 0.021 257 / 0.06),
+    0 8px 20px -10px color-mix(in oklab, var(--primary) 40%, transparent);
+  --elevation-glow:
+    0 2px 6px 0 oklch(0.24 0.021 257 / 0.06),
+    0 14px 32px -12px color-mix(in oklab, var(--primary) 55%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent);
 
   /* Subtle brand gradients — never loud */
   --gradient-primary: linear-gradient(
