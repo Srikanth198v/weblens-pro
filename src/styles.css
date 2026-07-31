@@ -195,6 +195,13 @@
     0 1px 2px 0 oklch(0 0 0 / 0.3), 0 8px 24px -12px oklch(0 0 0 / 0.5);
   --elevation-lifted:
     0 2px 4px 0 oklch(0 0 0 / 0.3), 0 18px 40px -16px oklch(0 0 0 / 0.55);
+  --elevation-glow-soft:
+    0 1px 2px 0 oklch(0 0 0 / 0.3),
+    0 8px 22px -10px color-mix(in oklab, var(--primary) 45%, transparent);
+  --elevation-glow:
+    0 2px 6px 0 oklch(0 0 0 / 0.3),
+    0 16px 36px -12px color-mix(in oklab, var(--primary) 60%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent);
 
   --gradient-primary: linear-gradient(
     135deg,
@@ -314,6 +321,45 @@
 
 @utility motion-drift {
   animation: weblens-drift 18s var(--motion-ease) infinite;
+}
+
+@utility motion-drift-slow {
+  animation: weblens-drift 28s var(--motion-ease) infinite;
+}
+
+@keyframes weblens-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+@utility motion-breathe {
+  animation: weblens-breathe 14s var(--motion-ease) infinite;
+}
+
+@keyframes weblens-sweep {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(8deg);
+    opacity: 0;
+  }
+  20%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(220%, 0, 0) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+@utility motion-sweep {
+  animation: weblens-sweep 22s var(--motion-ease) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
