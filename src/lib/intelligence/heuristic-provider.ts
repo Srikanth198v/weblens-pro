@@ -134,9 +134,12 @@ export const heuristicIntelligence: IntelligenceProvider = {
     const ranked = [...snapshot.categories].sort((a, b) => a.score - b.score);
     const weakest = ranked[0]!;
     const strongest = ranked[ranked.length - 1]!;
+    const others = ranked.slice(1);
     const quickWin =
-      ranked.find((category) => GUIDANCE[category.id]?.difficulty === "Easy" && category.score < 90) ??
-      ranked[1] ??
+      others.find(
+        (category) => GUIDANCE[category.id]?.difficulty === "Easy" && category.score < 90,
+      ) ??
+      others[0] ??
       weakest;
 
     const highlights: IntelligenceHighlight[] = [
