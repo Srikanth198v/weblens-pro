@@ -19,8 +19,8 @@ export function ScanSurface({ scanning }: { scanning: boolean }) {
 
       {scanning ? (
         <>
-          <div className="motion-scan pointer-events-none absolute inset-x-0 top-0 h-24">
-            <div className="h-full w-full bg-gradient-to-b from-transparent to-primary/12" />
+          <div className="motion-scan pointer-events-none absolute inset-0">
+            <div className="h-1/4 w-full bg-gradient-to-b from-transparent to-primary/15" />
             <div className="h-px w-full bg-primary/70 shadow-glow-soft" />
           </div>
           <div className="pointer-events-none absolute inset-0 bg-primary/[0.03]" />
