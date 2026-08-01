@@ -385,13 +385,13 @@
     transform: translate3d(0, -100%, 0);
   }
   100% {
-    transform: translate3d(0, calc(100cqh + 100%), 0);
+    transform: translate3d(0, 100%, 0);
   }
 }
 
 @utility motion-scan {
-  container-type: size;
-  animation: weblens-scan 3.2s var(--motion-ease) infinite;
+  animation: weblens-scan 3.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: transform;
 }
 
 @keyframes weblens-fade-swap {
