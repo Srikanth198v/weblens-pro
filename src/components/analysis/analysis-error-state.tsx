@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ export function AnalysisErrorState({
   url: string;
   onRetry: () => void;
 }) {
+  const router = useRouter();
   const display = url.replace(/^https?:\/\//i, "").replace(/\/$/, "");
 
   return (
@@ -22,7 +23,9 @@ export function AnalysisErrorState({
       </span>
       <h2 className="mt-4 text-xl font-bold text-foreground">We couldn't finish this analysis</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        {display ? `We reached a stopping point while reviewing ${display}.` : "We reached a stopping point."}{" "}
+        {display
+          ? `We reached a stopping point while reviewing ${display}.`
+          : "We reached a stopping point."}{" "}
         This usually clears up on a second try.
       </p>
 
@@ -30,10 +33,13 @@ export function AnalysisErrorState({
         <Button onClick={onRetry} size="lg" className="min-h-11 rounded-full px-6">
           Retry
         </Button>
-        <Button asChild variant="outline" size="lg" className="min-h-11 rounded-full px-6">
-          <Link to="/" search={{ url: undefined }} hash="analyze">
-            Edit URL
-          </Link>
+        <Button
+          onClick={() => router.history.back()}
+          variant="outline"
+          size="lg"
+          className="min-h-11 rounded-full px-6"
+        >
+          Edit URL
         </Button>
         <Button asChild variant="ghost" size="lg" className="min-h-11 rounded-full px-6">
           <Link to="/">Return Home</Link>
