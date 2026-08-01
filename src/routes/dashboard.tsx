@@ -1,14 +1,46 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 
+import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
+import { DashboardErrorState } from "@/components/dashboard/dashboard-error-state";
+import { DashboardSection } from "@/components/dashboard/dashboard-section";
+import { OverallScore } from "@/components/dashboard/overall-score";
+import { QuickSummary } from "@/components/dashboard/quick-summary";
+import { SectionNav } from "@/components/dashboard/section-nav";
+import { WebsitePreviewCard } from "@/components/dashboard/website-preview-card";
 import { SiteNav } from "@/components/layout/site-nav";
-import { Button } from "@/components/ui/button";
-import { readAnalysisResult } from "@/lib/analysis/store";
-import type { AnalysisResult } from "@/lib/analysis/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboardReport } from "@/hooks/use-dashboard-report";
+import { shareReport } from "@/lib/dashboard/export";
 
-const title = "Your analysis dashboard — WebLens AI";
+/** Lower sections load on demand so the first screen stays light. */
+const DetailedAnalysis = lazy(() =>
+  import("@/components/dashboard/detailed-analysis").then((module) => ({
+    default: module.DetailedAnalysis,
+  })),
+);
+const BusinessReview = lazy(() =>
+  import("@/components/dashboard/business-review").then((module) => ({
+    default: module.BusinessReview,
+  })),
+);
+const IntelligenceSection = lazy(() =>
+  import("@/components/dashboard/intelligence-section").then((module) => ({
+    default: module.IntelligenceSection,
+  })),
+);
+const RecommendationsSection = lazy(() =>
+  import("@/components/dashboard/recommendations-section").then((module) => ({
+    default: module.RecommendationsSection,
+  })),
+);
+const ExportArea = lazy(() =>
+  import("@/components/dashboard/export-area").then((module) => ({ default: module.ExportArea })),
+);
+
+const title = "Your website analysis dashboard — WebLens AI";
 const description =
-  "Review your website's WebLens AI analysis: overall score and category-level results.";
+  "A clear read on your website's design, performance, SEO, accessibility and business signals, with prioritised actions.";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -22,43 +54,145 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-/**
- * Phase 2 placeholder: receives the analysis result so the success transition
- * has a destination. The full dashboard is built in Phase 3.
- */
-function DashboardPage() {
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+function SectionFallback() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-20 w-full rounded-2xl" />
+      <Skeleton className="h-20 w-full rounded-2xl" />
+    </div>
+  );
+}
 
-  useEffect(() => {
-    setResult(readAnalysisResult());
-  }, []);
+function DashboardPage() {
+  const state = useDashboardReport();
 
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
-      <main className="mx-auto w-full max-w-[72rem] px-5 pt-28 pb-16 sm:px-8">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-          Analysis dashboard
-        </h1>
-        {result ? (
-          <p className="mt-3 text-muted-foreground">
-            Analysis ready for{" "}
-            <span className="font-medium text-foreground">
-              {result.url.replace(/^https?:\/\//i, "").replace(/\/$/, "")}
-            </span>{" "}
-            — overall score {result.overallScore}. The full dashboard arrives in the next phase.
-          </p>
-        ) : (
-          <div className="mt-4">
-            <p className="text-muted-foreground">
-              There's no analysis to show yet. Start with a website address.
-            </p>
-            <Button asChild className="mt-6 min-h-11 rounded-full px-6">
-              <Link to="/">Analyze a website</Link>
-            </Button>
+
+      <main className="mx-auto w-full max-w-[76rem] px-5 pt-24 pb-28 sm:px-8 sm:pt-28 xl:pr-24">
+        {state.status === "loading" ? (
+          <div className="space-y-4" aria-busy="true">
+            <Skeleton className="h-64 w-full rounded-3xl" />
+            <Skeleton className="h-40 w-full rounded-3xl" />
           </div>
-        )}
+        ) : null}
+
+        {state.status === "empty" ? <DashboardEmptyState /> : null}
+
+        {state.status === "error" ? <DashboardErrorState onRetry={state.reload} /> : null}
+
+        {state.status === "ready" ? (
+          <DashboardContent state={state} />
+        ) : null}
       </main>
     </div>
+  );
+}
+
+function DashboardContent({
+  state,
+}: {
+  state: Extract<ReturnType<typeof useDashboardReport>, { status: "ready" }>;
+}) {
+  const { report, intelligence, reload } = state;
+
+  return (
+    <>
+      <SectionNav />
+
+      <header className="pb-2">
+        <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+          Analysis complete
+        </p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+          {report.siteName}
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Reviewed {new Date(report.completedAt).toLocaleDateString()} · {report.displayUrl}
+        </p>
+      </header>
+
+      <DashboardSection
+        id="preview"
+        eyebrow="Section 01"
+        title="Website Preview"
+        description="The page WebLens reviewed, exactly as it was captured."
+      >
+        <WebsitePreviewCard
+          report={report}
+          onRefresh={reload}
+          onShare={() => void shareReport(report)}
+        />
+      </DashboardSection>
+
+      <DashboardSection
+        id="score"
+        eyebrow="Section 02"
+        title="Overall Score"
+        description="A single measure combining design, performance, SEO, accessibility and business signals."
+      >
+        <OverallScore report={report} />
+      </DashboardSection>
+
+      <DashboardSection
+        id="summary"
+        eyebrow="Section 03"
+        title="Quick Summary"
+        description="Where the site stands in each core area."
+      >
+        <QuickSummary categories={report.categories} />
+      </DashboardSection>
+
+      <DashboardSection
+        id="details"
+        eyebrow="Section 04"
+        title="Detailed Analysis"
+        description="Open any area to see what is working, what isn't, and what to do next."
+      >
+        <Suspense fallback={<SectionFallback />}>
+          <DetailedAnalysis categories={report.categories} />
+        </Suspense>
+      </DashboardSection>
+
+      <DashboardSection
+        id="business"
+        eyebrow="Section 05"
+        title="Business Review"
+        description="How the site performs as a business asset, not just as a webpage."
+      >
+        <Suspense fallback={<SectionFallback />}>
+          <BusinessReview metrics={report.business} />
+        </Suspense>
+      </DashboardSection>
+
+      <DashboardSection
+        id="intelligence"
+        eyebrow="Section 06"
+        title="WebLens Intelligence"
+        description="Consultant-style guidance: what to change, why it matters, and what it takes."
+      >
+        <Suspense fallback={<SectionFallback />}>
+          <IntelligenceSection intelligence={intelligence} />
+        </Suspense>
+      </DashboardSection>
+
+      <DashboardSection
+        id="recommendations"
+        eyebrow="Section 07"
+        title="Recommendations"
+        description="Every action from this analysis, grouped by priority."
+      >
+        <Suspense fallback={<SectionFallback />}>
+          <RecommendationsSection items={report.recommendations} />
+        </Suspense>
+      </DashboardSection>
+
+      <DashboardSection id="export" eyebrow="Section 08" title="Export">
+        <Suspense fallback={<SectionFallback />}>
+          <ExportArea report={report} />
+        </Suspense>
+      </DashboardSection>
+    </>
   );
 }
