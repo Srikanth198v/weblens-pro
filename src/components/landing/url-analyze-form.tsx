@@ -1,4 +1,4 @@
-import { ArrowRight, Globe } from "lucide-react";
+import { ArrowRight, Globe, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";

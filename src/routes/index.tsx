@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 
 import { HeroSection } from "@/components/landing/hero-section";
@@ -23,12 +23,19 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   const formRef = useRef<UrlAnalyzeFormHandle | null>(null);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
       <SiteNav onAnalyzeClick={() => formRef.current?.focus()} />
       <main>
-        <HeroSection formRef={formRef} />
+        <HeroSection
+          formRef={formRef}
+          onAnalyze={(url) => {
+            // Brief pause so the press + lock animation reads before leaving.
+            window.setTimeout(() => navigate({ to: "/analysis", search: { url } }), 260);
+          }}
+        />
       </main>
     </div>
   );
