@@ -1,4 +1,4 @@
-import { ArrowRight, Globe } from "lucide-react";
+import { ArrowRight, Globe, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [locked, setLocked] = useState(false);
 
   useEffect(() => {
     if (!formRef) return;
@@ -42,10 +43,12 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (locked) return;
     const result = validateUrl(value);
 
     if (result.status === "valid") {
       setError(null);
+      setLocked(true);
       onAnalyze?.(result.url);
       return;
     }
@@ -64,10 +67,12 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
       <form
         onSubmit={handleSubmit}
         noValidate
+        aria-busy={locked}
         className={cn(
-          "flex w-full flex-col gap-2 rounded-2xl border bg-card p-2.5 shadow-card transition-[border-color,box-shadow] duration-(--motion-component) ease-(--motion-ease) sm:flex-row sm:items-center sm:rounded-full sm:pl-6",
+          "flex w-full flex-col gap-2 rounded-2xl border bg-card p-2.5 shadow-card transition-[border-color,box-shadow,opacity] duration-(--motion-component) ease-(--motion-ease) sm:flex-row sm:items-center sm:rounded-full sm:pl-6",
           error ? "border-destructive/50" : "border-border focus-within:border-primary/60 focus-within:shadow-lifted",
           shake && "motion-shake",
+          locked && "border-primary/40 shadow-lifted",
         )}
       >
         <label htmlFor="website-url" className="sr-only">
@@ -82,6 +87,7 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
             inputMode="url"
             autoComplete="url"
             spellCheck={false}
+            readOnly={locked}
             placeholder="https://yourwebsite.com"
             value={value}
             onChange={(event) => {
@@ -90,18 +96,35 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
             }}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? "website-url-error" : "website-url-helper"}
-            className="min-h-13 w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none sm:min-h-14"
+            className={cn(
+              "min-h-13 w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none sm:min-h-14",
+              locked && "text-muted-foreground",
+            )}
           />
         </div>
         <Button
           type="submit"
           size="lg"
-          className="min-h-13 gap-2 rounded-xl px-7 text-[0.95rem] font-semibold shadow-glow-soft transition-[transform,box-shadow,filter] duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-glow hover:brightness-[1.03] active:translate-y-0 active:scale-[0.97] sm:min-h-14 sm:rounded-full"
+          disabled={locked}
+          className={cn(
+            "min-h-13 gap-2 rounded-xl px-7 text-[0.95rem] font-semibold shadow-glow-soft transition-[transform,box-shadow,filter] duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-glow hover:brightness-[1.03] active:translate-y-0 active:scale-[0.97] sm:min-h-14 sm:rounded-full",
+            locked && "scale-[0.97] opacity-90",
+          )}
         >
-          Analyze Website
-          <ArrowRight aria-hidden="true" className="size-4" />
+          {locked ? (
+            <>
+              Starting analysis
+              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+            </>
+          ) : (
+            <>
+              Analyze Website
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </>
+          )}
         </Button>
       </form>
+
 
       <p
         id={error ? "website-url-error" : "website-url-helper"}
