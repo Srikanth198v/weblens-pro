@@ -56,9 +56,7 @@ export function ExpandableCard({
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
-          <div className={cn("px-4 pb-5 sm:px-6", contentClassName)} hidden={!open ? undefined : undefined}>
-            {children}
-          </div>
+          <div className={cn("px-4 pb-5 sm:px-6", contentClassName)}>{children}</div>
         </div>
       </div>
     </div>
