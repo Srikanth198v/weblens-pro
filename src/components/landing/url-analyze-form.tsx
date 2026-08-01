@@ -20,6 +20,7 @@ export function UrlAnalyzeForm({ onAnalyze, formRef }: UrlAnalyzeFormProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [locked, setLocked] = useState(false);
 
   useEffect(() => {
     if (!formRef) return;
