@@ -81,7 +81,7 @@ function RecommendationCard({ item }: { item: Recommendation }) {
             <Icon aria-hidden="true" className="size-5" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold text-foreground sm:text-base">
+            <span className="block text-sm font-semibold text-foreground sm:text-base">
               {item.title}
             </span>
             <span className="mt-0.5 block text-xs text-muted-foreground">
