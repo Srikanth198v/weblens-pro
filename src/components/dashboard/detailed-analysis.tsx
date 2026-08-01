@@ -1,4 +1,5 @@
 import { Check, Lightbulb, Minus } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { ExpandableCard } from "@/components/dashboard/expandable-card";
 import { ScoreBadge } from "@/components/dashboard/score-badge";
@@ -67,7 +68,7 @@ function DetailList({
 }: {
   title: string;
   items: string[];
-  icon: React.ReactNode;
+  icon: ReactNode;
   emptyLabel: string;
 }) {
   return (
