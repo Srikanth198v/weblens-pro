@@ -69,22 +69,26 @@ function HighlightCard({ highlight }: { highlight: IntelligenceHighlight }) {
   return (
     <div
       className={cn(
-        "h-full rounded-2xl border p-5 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card",
-        isStrength ? "border-primary/25 bg-primary-soft/50" : "border-border bg-card",
+        "card-hover h-full rounded-2xl border p-5 shadow-soft",
+        isStrength ? "border-primary/30 bg-primary-soft/50" : "border-border bg-card",
       )}
     >
-      <span
-        className={cn(
-          "inline-flex size-10 items-center justify-center rounded-full",
-          isStrength ? "bg-primary/15 text-primary" : "bg-secondary text-secondary-foreground",
-        )}
-      >
-        <Icon aria-hidden="true" className="size-5" />
-      </span>
-      <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-        {highlight.title}
+      <div className="flex items-center gap-3">
+        <span
+          className={cn(
+            "inline-flex size-10 shrink-0 items-center justify-center rounded-full",
+            isStrength ? "bg-primary/15 text-primary" : "bg-secondary text-secondary-foreground",
+          )}
+        >
+          <Icon aria-hidden="true" className="size-5" />
+        </span>
+        <p className="min-w-0 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          {highlight.title}
+        </p>
+      </div>
+      <p className="mt-4 font-display text-lg leading-snug font-bold text-foreground">
+        {highlight.subject}
       </p>
-      <p className="mt-1 font-display text-lg font-bold text-foreground">{highlight.subject}</p>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{highlight.detail}</p>
     </div>
   );
