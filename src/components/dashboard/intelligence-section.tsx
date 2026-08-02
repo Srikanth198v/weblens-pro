@@ -154,12 +154,25 @@ function ConsultantCard({
 
         <div>
           <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-            <span>Confidence</span>
+            <span>
+              Confidence ·{" "}
+              <span className="font-semibold text-foreground">
+                {recommendation.confidence >= 80
+                  ? "High"
+                  : recommendation.confidence >= 60
+                    ? "Moderate"
+                    : "Early signal"}
+              </span>
+            </span>
             <span className="tabular-nums">{recommendation.confidence}%</span>
           </div>
-          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-secondary"
+            role="img"
+            aria-label={`Confidence ${recommendation.confidence} out of 100`}
+          >
             <div
-              className="h-full rounded-full bg-primary transition-[width] duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
+              className="h-full rounded-full bg-primary transition-[width] duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none"
               style={{ width: `${recommendation.confidence}%` }}
             />
           </div>
