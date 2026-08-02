@@ -28,7 +28,7 @@ export function ExpandableCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-card shadow-soft transition-shadow duration-200 hover:shadow-card",
+        "card-hover rounded-2xl border border-border bg-card shadow-soft",
         className,
       )}
     >

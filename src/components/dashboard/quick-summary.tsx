@@ -31,7 +31,7 @@ function SummaryCard({ category, delay }: { category: CategoryDetail; delay: num
   return (
     <div
       ref={ref}
-      className="h-full rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow duration-200 hover:shadow-card"
+      className="card-hover h-full rounded-2xl border border-border bg-card p-5 shadow-soft"
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm font-semibold text-foreground">{category.label}</p>
