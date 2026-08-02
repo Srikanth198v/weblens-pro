@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
@@ -9,12 +10,21 @@ import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; comingSoon?: boolean };
 
+/** Routes that exist today. */
+const NAV_LINKS = [
+  { label: "Reports", to: "/reports" },
+  { label: "Favorites", to: "/favorites" },
+] as const;
+
 const NAV_ITEMS: NavItem[] = [
   { label: "Documentation" },
   { label: "About" },
   { label: "Pricing", comingSoon: true },
   { label: "Sign In" },
 ];
+
+const NAV_LINK_CLASS =
+  "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors duration-(--motion-micro) hover:text-foreground";
 
 function NavItemButton({ item, className }: { item: NavItem; className?: string }) {
   return (
@@ -59,6 +69,16 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
         <BrandMark />
 
         <div className="hidden items-center gap-1 lg:flex">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={NAV_LINK_CLASS}
+              activeProps={{ className: "text-foreground" }}
+            >
+              {link.label}
+            </Link>
+          ))}
           {NAV_ITEMS.map((item) => (
             <NavItemButton key={item.label} item={item} />
           ))}
@@ -94,6 +114,17 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
                 <SheetTitle className="text-left font-display">Menu</SheetTitle>
               </SheetHeader>
               <div className="mt-2 flex flex-col gap-1 px-4 pb-6">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setOpen(false)}
+                    className={cn(NAV_LINK_CLASS, "justify-start")}
+                    activeProps={{ className: "text-foreground" }}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
                 {NAV_ITEMS.map((item) => (
                   <NavItemButton key={item.label} item={item} className="justify-start" />
                 ))}
