@@ -35,7 +35,17 @@ export function ExportArea({ report }: { report: DashboardReport }) {
         Save a copy, paste it into your notes, or send it to whoever owns the site.
       </p>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <Button
+          asChild
+          size="lg"
+          className="min-h-12 rounded-full px-6 shadow-glow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow active:translate-y-0"
+        >
+          <Link to="/report">
+            <FileText aria-hidden="true" className="size-4" />
+            View Full Report
+          </Link>
+        </Button>
         <Button
           onClick={downloadPdf}
           size="lg"
