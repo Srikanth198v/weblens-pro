@@ -85,7 +85,10 @@ function ReportBody({
 
   return (
     <>
-      <ReportHeader report={report} lead={view.summary[0] ?? ""} />
+      <ReportHeader
+        report={report}
+        lead={`${report.siteName} sits at ${report.overallScore} out of 100. Below you'll find what's working, what to fix first, and the result each change should bring.`}
+      />
 
       <DashboardSection
         id="executive-summary"
