@@ -88,6 +88,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "WebLens AI" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "WebLens AI — Professional Website Analysis Made Simple" },
+      { name: "twitter:title", content: "WebLens AI — Professional Website Analysis Made Simple" },
+      { property: "og:description", content: "WebLens AI analyzes any website and turns the results into a clear, professional consultation you can act on with confidence." },
+      { name: "twitter:description", content: "WebLens AI analyzes any website and turns the results into a clear, professional consultation you can act on with confidence." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0581d53-ddf8-4d04-a5cb-3d5f2c75dbfa/id-preview-e484d72f--c3a93f62-9524-4c3d-8bc7-e71c4a203d49.lovable.app-1785656149969.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0581d53-ddf8-4d04-a5cb-3d5f2c75dbfa/id-preview-e484d72f--c3a93f62-9524-4c3d-8bc7-e71c4a203d49.lovable.app-1785656149969.png" },
     ],
     links: [
       {
@@ -104,7 +110,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap",
       },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
   }),
 
