@@ -48,8 +48,9 @@ export function ExportArea({ report }: { report: DashboardReport }) {
         </Button>
         <Button
           onClick={downloadPdf}
+          variant="outline"
           size="lg"
-          className="min-h-12 rounded-full px-6 shadow-glow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow active:translate-y-0"
+          className="min-h-12 rounded-full px-6 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
         >
           <Download aria-hidden="true" className="size-4" />
           Download PDF
