@@ -69,6 +69,16 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
         <BrandMark />
 
         <div className="hidden items-center gap-1 lg:flex">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={NAV_LINK_CLASS}
+              activeProps={{ className: "text-foreground" }}
+            >
+              {link.label}
+            </Link>
+          ))}
           {NAV_ITEMS.map((item) => (
             <NavItemButton key={item.label} item={item} />
           ))}
