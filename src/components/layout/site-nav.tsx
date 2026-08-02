@@ -114,6 +114,17 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
                 <SheetTitle className="text-left font-display">Menu</SheetTitle>
               </SheetHeader>
               <div className="mt-2 flex flex-col gap-1 px-4 pb-6">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setOpen(false)}
+                    className={cn(NAV_LINK_CLASS, "justify-start")}
+                    activeProps={{ className: "text-foreground" }}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
                 {NAV_ITEMS.map((item) => (
                   <NavItemButton key={item.label} item={item} className="justify-start" />
                 ))}
