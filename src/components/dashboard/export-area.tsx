@@ -1,4 +1,5 @@
-import { Copy, Download, Share2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Copy, Download, FileText, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
