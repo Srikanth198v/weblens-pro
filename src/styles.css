@@ -423,3 +423,50 @@
 @utility motion-pop {
   animation: weblens-pop var(--motion-component) var(--motion-ease);
 }
+
+/*
+ * Shared interaction utilities (PRD Volume 7).
+ * Cards lift gently at component timing; presses compress, never bounce.
+ */
+@utility card-hover {
+  transition:
+    box-shadow var(--motion-component) var(--motion-ease),
+    transform var(--motion-component) var(--motion-ease),
+    border-color var(--motion-component) var(--motion-ease);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elevation-card);
+  }
+}
+
+@utility press {
+  transition: transform var(--motion-micro) var(--motion-ease);
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes weblens-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/** Page-level entrance, at the slowest step of the motion scale. */
+@utility motion-page-enter {
+  animation: weblens-page-enter var(--motion-page) var(--motion-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover:hover,
+  .press:active {
+    transform: none;
+  }
+}
