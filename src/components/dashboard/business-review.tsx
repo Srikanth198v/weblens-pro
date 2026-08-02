@@ -24,7 +24,7 @@ function MetricCard({ metric, delay }: { metric: BusinessMetric; delay: number }
   return (
     <div
       ref={ref}
-      className="h-full rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow duration-200 hover:shadow-card"
+      className="card-hover h-full rounded-2xl border border-border bg-card p-5 shadow-soft"
     >
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-sm font-semibold text-foreground">{metric.label}</p>

@@ -9,7 +9,7 @@ export function StrengthsSection({ strengths }: { strengths: ReportStrength[] })
     <ul className="grid gap-4 md:grid-cols-2">
       {strengths.map((strength, index) => (
         <Reveal as="li" key={strength.id} delay={(index % 2) * 100} className="h-full">
-          <div className="h-full rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow duration-200 hover:shadow-card">
+          <div className="card-hover h-full rounded-2xl border border-border bg-card p-5 shadow-soft">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft">
                 <Check aria-hidden="true" className="size-4 text-primary" />

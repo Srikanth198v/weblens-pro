@@ -27,7 +27,7 @@ export function ReportCard({
   };
 
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow duration-200 hover:shadow-card">
+    <article className="card-hover flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-soft">
       <MiniPreview siteName={report.siteName} />
 
       <div className="mt-4 flex items-start justify-between gap-3">

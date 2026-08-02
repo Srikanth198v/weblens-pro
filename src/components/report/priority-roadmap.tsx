@@ -25,7 +25,7 @@ export function PriorityRoadmap({ report }: { report: DashboardReport }) {
                 {lane.items.map((item) => (
                   <li
                     key={item.id}
-                    className="rounded-xl bg-surface p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                    className="card-hover rounded-xl bg-surface p-4"
                   >
                     <p className="text-sm font-semibold text-foreground">{item.title}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
