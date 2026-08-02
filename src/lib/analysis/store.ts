@@ -1,4 +1,5 @@
 import type { AnalysisResult } from "@/lib/analysis/types";
+import { saveReport } from "@/lib/reports/storage";
 
 /**
  * Holds the most recent analysis result for the next screen to read.
@@ -15,6 +16,8 @@ export function saveAnalysisResult(result: AnalysisResult) {
   } catch {
     // Storage unavailable — in-memory copy is enough for this session.
   }
+  // Keep the report library in sync; saving the same analysis twice is a no-op.
+  saveReport(result);
 }
 
 export function readAnalysisResult(): AnalysisResult | null {
