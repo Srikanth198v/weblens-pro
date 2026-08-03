@@ -31,7 +31,44 @@ export function DetailedAnalysis({ categories }: { categories: CategoryDetail[] 
               </span>
             }
           >
-            <div className="grid gap-6 border-t border-border pt-5 md:grid-cols-3">
+            <div className="border-t border-border pt-5">
+              {category.measured.length ? (
+                <div>
+                  <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                    Measured signals
+                  </p>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {category.measured.map((signal) => (
+                      <li
+                        key={signal}
+                        className="rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-foreground/80"
+                      >
+                        {signal}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              <dl className="mt-5 grid gap-4 sm:grid-cols-3">
+                {[
+                  { label: "Why this score", value: category.whyThisScore },
+                  { label: "Biggest factor", value: category.biggestFactor },
+                  { label: "What would improve it", value: category.whatWouldImprove },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl bg-surface p-4">
+                    <dt className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                      {item.label}
+                    </dt>
+                    <dd className="mt-1.5 text-sm leading-relaxed text-foreground/85">
+                      {item.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <div className="mt-6 grid gap-6 md:grid-cols-3">
               <DetailList
                 title="Strengths"
                 items={category.strengths}
