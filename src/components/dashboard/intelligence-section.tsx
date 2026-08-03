@@ -36,6 +36,12 @@ const PRIORITY_CLASS: Record<IntelligencePriority, string> = {
 export function IntelligenceSection({ intelligence }: { intelligence: IntelligenceReport }) {
   return (
     <div className="space-y-6">
+      <Reveal>
+        <p className="max-w-3xl rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-foreground/85 shadow-soft sm:text-base">
+          {intelligence.briefing}
+        </p>
+      </Reveal>
+
       <div className="grid gap-4 lg:grid-cols-3">
         {intelligence.highlights.map((highlight, index) => (
           <Reveal key={highlight.kind} delay={index * 120}>
@@ -44,12 +50,14 @@ export function IntelligenceSection({ intelligence }: { intelligence: Intelligen
         ))}
       </div>
 
+      {intelligence.celebration ? (
       <Reveal>
         <p className="flex items-start gap-2.5 rounded-2xl border border-primary/20 bg-primary-soft/60 p-4 text-sm leading-relaxed text-accent-foreground">
           <Sparkles aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           {intelligence.celebration}
         </p>
       </Reveal>
+      ) : null}
 
       <div className="space-y-3">
         {intelligence.recommendations.map((recommendation, index) => (
@@ -90,6 +98,12 @@ function HighlightCard({ highlight }: { highlight: IntelligenceHighlight }) {
         {highlight.subject}
       </p>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{highlight.detail}</p>
+      {highlight.evidence ? (
+        <p className="mt-3 rounded-xl bg-background/60 p-3 text-xs leading-relaxed text-foreground/75">
+          <span className="font-semibold text-foreground">Evidence: </span>
+          {highlight.evidence}
+        </p>
+      ) : null}
     </div>
   );
 }

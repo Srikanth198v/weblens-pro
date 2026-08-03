@@ -1,5 +1,6 @@
 import {
   Briefcase,
+  Compass,
   Download,
   Gauge,
   LayoutGrid,
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
   monitor: Monitor,
+  compass: Compass,
   gauge: Gauge,
   "layout-grid": LayoutGrid,
   "list-checks": ListChecks,

@@ -58,6 +58,18 @@ function ImprovementCard({ item }: { item: ImprovementItem }) {
           <Fact label="Difficulty" value={item.difficulty} />
           <Fact label="Estimated time" value={item.estimatedTime} />
         </dl>
+        <div className="mt-4 rounded-xl bg-surface p-3.5">
+          <p className="text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            What we found on your page
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {item.evidence.map((line) => (
+              <li key={line} className="text-sm leading-relaxed text-foreground/85">
+                · {line}
+              </li>
+            ))}
+          </ul>
+        </div>
         <p className="mt-4 rounded-xl bg-surface p-3.5 text-sm leading-relaxed text-foreground/85">
           <span className="font-semibold text-foreground">Expected result: </span>
           {item.expectedResult}

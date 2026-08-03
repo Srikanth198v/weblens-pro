@@ -107,7 +107,7 @@ function AnalysisRunner({ url, checks }: { url: string; checks: VerificationChec
     if (status !== "complete") return;
     const fade = window.setTimeout(() => setLeaving(true), HOLD_MS);
     const go = window.setTimeout(() => {
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/dashboard", replace: true });
     }, HOLD_MS + 400);
     return () => {
       window.clearTimeout(fade);

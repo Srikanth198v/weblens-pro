@@ -39,6 +39,10 @@ function MetricCard({ metric, delay }: { metric: BusinessMetric; delay: number }
         {STATUS_LABEL[status]}
       </p>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{metric.explanation}</p>
+      <p className="mt-3 rounded-xl bg-surface p-3 text-xs leading-relaxed text-foreground/75">
+        <span className="font-semibold text-foreground">Measured: </span>
+        {metric.evidence}
+      </p>
     </div>
   );
 }

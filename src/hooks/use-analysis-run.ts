@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { mockAnalysisEngine } from "@/lib/analysis/mock-engine";
+import { liveAnalysisEngine } from "@/lib/analysis/live-engine";
 import { STATUS_MESSAGES, stageForPercent } from "@/lib/analysis/stages";
 import { saveAnalysisResult } from "@/lib/analysis/store";
 import type { AnalysisEngine, AnalysisResult, StageId } from "@/lib/analysis/types";
@@ -13,7 +13,7 @@ const MESSAGE_INTERVAL_MS = 1100;
  * Orchestrates a single analysis run: progress, stage, rotating status copy,
  * completion and failure. Presentation components stay stateless.
  */
-export function useAnalysisRun(url: string, engine: AnalysisEngine = mockAnalysisEngine) {
+export function useAnalysisRun(url: string, engine: AnalysisEngine = liveAnalysisEngine) {
   const [percent, setPercent] = useState(0);
   const [stageId, setStageId] = useState<StageId>("connecting");
   const [messageIndex, setMessageIndex] = useState(0);
