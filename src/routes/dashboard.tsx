@@ -8,6 +8,7 @@ import { OverallScore } from "@/components/dashboard/overall-score";
 import { QuickSummary } from "@/components/dashboard/quick-summary";
 import { SectionNav } from "@/components/dashboard/section-nav";
 import { WebsitePreviewCard } from "@/components/dashboard/website-preview-card";
+import { WebsiteUnderstandingSection } from "@/components/dashboard/website-understanding";
 import { SiteNav } from "@/components/layout/site-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardReport } from "@/hooks/use-dashboard-report";
@@ -130,8 +131,20 @@ function DashboardContent({
       </DashboardSection>
 
       <DashboardSection
-        id="score"
+        id="understanding"
         eyebrow="Section 02"
+        title="Website Understanding"
+        description="What WebLens read on the page, before scoring anything."
+      >
+        <WebsiteUnderstandingSection
+          understanding={report.understanding}
+          confidence={report.confidence}
+        />
+      </DashboardSection>
+
+      <DashboardSection
+        id="score"
+        eyebrow="Section 03"
         title="Overall Score"
         description="A single measure combining design, performance, SEO, accessibility and business signals."
       >
@@ -140,7 +153,7 @@ function DashboardContent({
 
       <DashboardSection
         id="summary"
-        eyebrow="Section 03"
+        eyebrow="Section 04"
         title="Quick Summary"
         description="Where the site stands in each core area."
       >
@@ -149,7 +162,7 @@ function DashboardContent({
 
       <DashboardSection
         id="details"
-        eyebrow="Section 04"
+        eyebrow="Section 05"
         title="Detailed Analysis"
         description="Open any area to see what is working, what isn't, and what to do next."
       >
@@ -160,7 +173,7 @@ function DashboardContent({
 
       <DashboardSection
         id="business"
-        eyebrow="Section 05"
+        eyebrow="Section 06"
         title="Business Review"
         description="How the site performs as a business asset, not just as a webpage."
       >
@@ -171,7 +184,7 @@ function DashboardContent({
 
       <DashboardSection
         id="intelligence"
-        eyebrow="Section 06"
+        eyebrow="Section 07"
         title="WebLens Intelligence"
         description="Consultant-style guidance: what to change, why it matters, and what it takes."
       >
@@ -182,7 +195,7 @@ function DashboardContent({
 
       <DashboardSection
         id="recommendations"
-        eyebrow="Section 07"
+        eyebrow="Section 08"
         title="Recommendations"
         description="Every action from this analysis, grouped by priority."
       >
@@ -191,7 +204,7 @@ function DashboardContent({
         </Suspense>
       </DashboardSection>
 
-      <DashboardSection id="export" eyebrow="Section 08" title="Export">
+      <DashboardSection id="export" eyebrow="Section 09" title="Export">
         <Suspense fallback={<SectionFallback />}>
           <ExportArea report={report} />
         </Suspense>

@@ -4,6 +4,8 @@
  * for a real crawler or AI service without touching presentation code.
  */
 
+import type { SiteEvidence, WebsiteUnderstanding } from "@/lib/analysis/evidence";
+
 export type StageId =
   | "connecting"
   | "loading"
@@ -28,6 +30,12 @@ export type AnalysisResult = {
   completedAt: string;
   overallScore: number;
   categories: CategoryScore[];
+  /**
+   * Everything measured from the live page. Reports are built from this, so a
+   * result without evidence is treated as an older, unverifiable analysis.
+   */
+  evidence?: SiteEvidence;
+  understanding?: WebsiteUnderstanding;
 };
 
 export type AnalysisProgress = {

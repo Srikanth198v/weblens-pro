@@ -41,12 +41,8 @@ export function useDashboardReport(
 
     try {
       const report = buildDashboardReport(raw.data as never);
-      const intelligence = provider.generate({
-        siteName: report.siteName,
-        overallScore: report.overallScore,
-        categories: report.categories.map(({ id, label, score }) => ({ id, label, score })),
-        business: report.business.map(({ id, label, score }) => ({ id, label, score })),
-      });
+      const intelligence = provider.generate(report);
+
       return { status: "ready", report, intelligence };
     } catch {
       return { status: "error" };

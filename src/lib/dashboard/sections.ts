@@ -1,6 +1,7 @@
 /** Section registry — drives both the page order and the floating navigation. */
 export const DASHBOARD_SECTIONS = [
   { id: "preview", label: "Website Preview", short: "Preview", icon: "monitor" },
+  { id: "understanding", label: "Website Understanding", short: "Understanding", icon: "compass" },
   { id: "score", label: "Overall Score", short: "Score", icon: "gauge" },
   { id: "summary", label: "Quick Summary", short: "Summary", icon: "layout-grid" },
   { id: "details", label: "Detailed Analysis", short: "Details", icon: "list-checks" },

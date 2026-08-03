@@ -2,13 +2,24 @@
  * Dashboard view model.
  *
  * The dashboard never reads the analysis engine directly. A report builder
- * turns whatever the engine returns into these shapes, so a future AI or
- * crawler engine can be swapped in without touching presentation code.
+ * turns the collected evidence into these shapes, so a future AI or crawler
+ * engine can be swapped in without touching presentation code.
+ *
+ * Rule: every string a user reads here must be derived from measured
+ * evidence. Nothing in this layer invents a finding.
  */
+
+import type { EvidenceSourceId, SiteEvidence, WebsiteUnderstanding } from "@/lib/analysis/evidence";
 
 export type ScoreStatus = "excellent" | "good" | "needs-improvement";
 
 export type CategoryId = "design" | "performance" | "seo" | "accessibility" | "business";
+
+export type CategoryFactor = {
+  label: string;
+  detail: string;
+  verdict: "pass" | "warn" | "fail";
+};
 
 export type CategoryDetail = {
   id: CategoryId;
@@ -16,27 +27,24 @@ export type CategoryDetail = {
   score: number;
   /** One-line plain-language summary used by the quick summary cards. */
   summary: string;
+  /** What was measured to produce this score. */
+  measured: string[];
+  factors: CategoryFactor[];
+  whyThisScore: string;
+  biggestFactor: string;
+  whatWouldImprove: string;
   strengths: string[];
   weaknesses: string[];
   suggestions: string[];
 };
 
-export type BusinessMetricId =
-  | "homepage-clarity"
-  | "call-to-action"
-  | "trust-signals"
-  | "testimonials"
-  | "pricing"
-  | "contact-information"
-  | "navigation"
-  | "faq"
-  | "about-page";
-
 export type BusinessMetric = {
-  id: BusinessMetricId;
+  id: string;
   label: string;
   score: number;
   explanation: string;
+  /** The measurement the explanation is based on. */
+  evidence: string;
 };
 
 export type RecommendationPriority = "high" | "medium" | "low";
@@ -45,14 +53,23 @@ export type RecommendationDifficulty = "Easy" | "Moderate" | "Advanced";
 
 export type Recommendation = {
   id: string;
+  category: CategoryId;
   /** Icon key resolved by the presentation layer — no components in data. */
   icon: "layout" | "gauge" | "search" | "accessibility" | "briefcase" | "sparkles";
   title: string;
   description: string;
+  /** Measured facts that triggered this recommendation. Never empty. */
+  evidence: string[];
   priority: RecommendationPriority;
   impact: RecommendationImpact;
   difficulty: RecommendationDifficulty;
   estimatedTime: string;
+};
+
+export type ReportConfidence = {
+  /** 0–100, based on how much of the page we were able to read. */
+  score: number;
+  sources: Array<{ id: EvidenceSourceId; label: string; used: boolean }>;
 };
 
 export type DashboardReport = {
@@ -65,4 +82,7 @@ export type DashboardReport = {
   categories: CategoryDetail[];
   business: BusinessMetric[];
   recommendations: Recommendation[];
+  understanding: WebsiteUnderstanding | null;
+  evidence: SiteEvidence | null;
+  confidence: ReportConfidence;
 };
