@@ -10,11 +10,17 @@ export type UrlValidation =
 
 const HOST_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i;
 
-/** Adds https:// when the user typed a bare domain. */
+/**
+ * Adds https:// when the user typed a bare domain, trims whitespace,
+ * lowercases the scheme/host and collapses duplicate slashes in the path.
+ */
 export function normalizeUrl(raw: string): string {
-  const trimmed = raw.trim();
+  const trimmed = raw.trim().replace(/\s+/g, "");
   if (!trimmed) return "";
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  const withScheme = /^https?:\/\//i.test(trimmed)
+    ? trimmed.replace(/^(https?):\/\/+/i, (_m, scheme: string) => `${scheme.toLowerCase()}://`)
+    : `https://${trimmed.replace(/^\/+/, "")}`;
+  return withScheme.replace(/([^:]\/)\/+/g, "$1");
 }
 
 export function validateUrl(raw: string): UrlValidation {
