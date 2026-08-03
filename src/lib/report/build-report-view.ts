@@ -79,34 +79,34 @@ function summaryFor(report: DashboardReport): string[] {
   const best = ranked[0];
   const weakest = ranked[ranked.length - 1];
   const status = STATUS_LABEL[statusForScore(report.overallScore)].toLowerCase();
-  const strongBusiness = [...report.business].sort((a, b) => b.score - a.score)[0];
+  const opening = report.understanding
+    ? report.understanding.summary
+    : `${report.siteName} was analyzed at ${report.displayUrl}.`;
 
   return [
-    `${report.siteName} scores ${report.overallScore} out of 100 overall, which we read as ${status}. ` +
-      `The strongest area is ${best?.label.toLowerCase()} at ${best?.score}, and the area with the most room to grow is ${weakest?.label.toLowerCase()} at ${weakest?.score}.`,
-    report.categories
-      .map((category) => `${category.label}: ${category.summary}`)
-      .join(" ")
-      .concat(
-        strongBusiness
-          ? ` As a business asset, ${strongBusiness.label.toLowerCase()} is the site's clearest advantage.`
-          : "",
-      ),
-    `Nothing here needs a rebuild. Working through the quick wins first, then the medium-priority items, ` +
-      `should move ${report.siteName} into a stronger position without disrupting what already works.`,
+    `${opening} On the evidence collected from the page, it scores ${report.overallScore} out of 100 overall, which we read as ${status}.`,
+    `The strongest area is ${best?.label.toLowerCase()} at ${best?.score} — ${best?.biggestFactor ?? best?.summary}. ` +
+      `The area with the most room to grow is ${weakest?.label.toLowerCase()} at ${weakest?.score}: ${weakest?.biggestFactor ?? weakest?.summary}`,
+    weakest
+      ? `Nothing here needs a rebuild. ${weakest.whatWouldImprove} Working through the quick wins first, then the medium-priority items, should move ${report.siteName} into a stronger position without disrupting what already works.`
+      : `Re-run this analysis to collect page evidence and see specific actions.`,
   ];
 }
 
 function strengthsFor(report: DashboardReport): ReportStrength[] {
   const fromCategories = ordered(report)
-    .filter((category) => category.strengths.length > 0)
-    .slice(0, 4)
-    .map((category) => ({
-      id: `category-${category.id}`,
-      title: `${category.label} — ${category.strengths[0]}`,
-      explanation: category.summary,
-      businessValue: BUSINESS_VALUE[category.id] ?? "A better experience for every visitor.",
-    }));
+    .flatMap((category) =>
+      category.factors
+        .filter((factor) => factor.verdict === "pass")
+        .slice(0, 1)
+        .map((factor) => ({
+          id: `category-${category.id}`,
+          title: `${category.label} — ${factor.label}`,
+          explanation: factor.detail,
+          businessValue: BUSINESS_VALUE[category.id] ?? "A better experience for every visitor.",
+        })),
+    )
+    .slice(0, 4);
 
   const fromBusiness = report.business
     .filter((metric) => statusForScore(metric.score) !== "needs-improvement")
@@ -115,12 +115,13 @@ function strengthsFor(report: DashboardReport): ReportStrength[] {
     .map((metric) => ({
       id: `business-${metric.id}`,
       title: `${metric.label} is working well`,
-      explanation: metric.explanation,
+      explanation: metric.evidence,
       businessValue: "Visitors get what they need here without extra effort.",
     }));
 
   return [...fromCategories, ...fromBusiness];
 }
+
 
 const PRIORITY_WEIGHT: Record<Recommendation["priority"], number> = {
   high: 0,
