@@ -93,6 +93,19 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     >
       <div className="border-t border-border pt-5">
         <p className="text-sm leading-relaxed text-foreground/85">{item.description}</p>
+
+        <div className="mt-4 rounded-xl bg-surface p-4">
+          <p className="text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            What we found on your page
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {item.evidence.map((line) => (
+              <li key={line} className="text-sm leading-relaxed text-foreground/85">
+                · {line}
+              </li>
+            ))}
+          </ul>
+        </div>
         <dl className="mt-4 grid gap-3 sm:grid-cols-3">
           <Fact label="Estimated impact" value={item.impact} />
           <Fact label="Estimated difficulty" value={item.difficulty} />
