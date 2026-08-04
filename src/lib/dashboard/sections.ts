@@ -3,6 +3,7 @@ export const DASHBOARD_SECTIONS = [
   { id: "preview", label: "Website Preview", short: "Preview", icon: "monitor" },
   { id: "understanding", label: "Website Understanding", short: "Understanding", icon: "compass" },
   { id: "score", label: "Overall Score", short: "Score", icon: "gauge" },
+  { id: "breakdown", label: "Score Breakdown", short: "Breakdown", icon: "sliders-horizontal" },
   { id: "summary", label: "Quick Summary", short: "Summary", icon: "layout-grid" },
   { id: "details", label: "Detailed Analysis", short: "Details", icon: "list-checks" },
   { id: "business", label: "Business Review", short: "Business", icon: "briefcase" },

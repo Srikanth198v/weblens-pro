@@ -60,10 +60,34 @@ export type Recommendation = {
   description: string;
   /** Measured facts that triggered this recommendation. Never empty. */
   evidence: string[];
+  /** Consultant framing: why the measurement is worth acting on. */
+  whyItMatters: string;
+  /** The commercial consequence of leaving it as-is. */
+  businessImpact: string;
+  /** Concrete steps, derived from the measurement — never generic filler. */
+  howToFix: string[];
+  /** Before vs after, both grounded in the measurement. */
+  currentState: string;
+  recommendedState: string;
+  expectedResults: string[];
+  /** Estimated points added to the overall score if fully resolved. */
+  estimatedGain: number;
   priority: RecommendationPriority;
   impact: RecommendationImpact;
   difficulty: RecommendationDifficulty;
   estimatedTime: string;
+};
+
+export type ScoreBreakdownItem = {
+  id: CategoryId;
+  label: string;
+  score: number;
+  /** Percentage share of the overall score. */
+  weight: number;
+  /** Points this area contributes to the overall score, out of `weight`. */
+  contribution: number;
+  /** Why this area carries this weight. */
+  explanation: string;
 };
 
 export type ReportConfidence = {
@@ -79,6 +103,8 @@ export type DashboardReport = {
   displayUrl: string;
   completedAt: string;
   overallScore: number;
+  /** Published weighting behind the overall score. */
+  breakdown: ScoreBreakdownItem[];
   categories: CategoryDetail[];
   business: BusinessMetric[];
   recommendations: Recommendation[];

@@ -2,6 +2,13 @@ import { EVIDENCE_SOURCE_LABEL, type EvidenceSourceId } from "@/lib/analysis/evi
 import { evaluateEvidence, type EvidenceFactor } from "@/lib/analysis/score-from-evidence";
 import { buildUnderstanding } from "@/lib/analysis/understanding";
 import type { AnalysisResult } from "@/lib/analysis/types";
+import {
+  CATEGORY_BUSINESS_IMPACT,
+  CATEGORY_EXPECTED_RESULTS,
+  CATEGORY_WEIGHT,
+  CATEGORY_WEIGHT_REASON,
+  CATEGORY_WHY_IT_MATTERS,
+} from "@/lib/dashboard/weights";
 import type {
   BusinessMetric,
   CategoryDetail,
@@ -10,6 +17,7 @@ import type {
   Recommendation,
   RecommendationPriority,
   ReportConfidence,
+  ScoreBreakdownItem,
 } from "@/lib/dashboard/types";
 
 /**
@@ -61,12 +69,31 @@ function priorityFor(factor: EvidenceFactor): RecommendationPriority {
   return "low";
 }
 
+/**
+ * Estimated points added to the overall score if this factor were fully
+ * resolved. Derived from the real factor weight inside its category and that
+ * category's published share of the overall score — never a guess.
+ */
+function estimatedGainFor(factor: EvidenceFactor, factors: EvidenceFactor[]): number {
+  const categoryWeight = factors
+    .filter((item) => item.category === factor.category)
+    .reduce((sum, item) => sum + item.weight, 0);
+  if (!categoryWeight) return 0;
+
+  const categoryPoints = ((100 - factor.score) * factor.weight) / categoryWeight;
+  const overallPoints = (categoryPoints * CATEGORY_WEIGHT[factor.category]) / 100;
+  return Math.max(1, Math.round(overallPoints));
+}
+
 /** One recommendation per failing measurement — never more, never invented. */
 function recommendationsFrom(factors: EvidenceFactor[]): Recommendation[] {
   const items = factors
     .filter((factor) => factor.remedy && factor.verdict !== "pass")
     .map((factor) => {
       const remedy = factor.remedy!;
+      const gain = estimatedGainFor(factor, factors);
+      const fix = factor.improvement ?? remedy.description;
+
       return {
         id: factor.id,
         category: factor.category,
@@ -74,6 +101,16 @@ function recommendationsFrom(factors: EvidenceFactor[]): Recommendation[] {
         title: remedy.title,
         description: remedy.description,
         evidence: [factor.detail, ...(factor.improvement ? [factor.improvement] : [])],
+        whyItMatters: CATEGORY_WHY_IT_MATTERS[factor.category],
+        businessImpact: CATEGORY_BUSINESS_IMPACT[factor.category],
+        howToFix: [fix, `Re-run the analysis afterwards to confirm “${factor.label}” now passes.`],
+        currentState: factor.detail,
+        recommendedState: fix,
+        expectedResults: [
+          ...CATEGORY_EXPECTED_RESULTS[factor.category],
+          `Estimated overall score +${gain}`,
+        ],
+        estimatedGain: gain,
         priority: priorityFor(factor),
         impact: remedy.impact,
         difficulty: remedy.difficulty,
@@ -82,7 +119,7 @@ function recommendationsFrom(factors: EvidenceFactor[]): Recommendation[] {
     });
 
   const order = { high: 0, medium: 1, low: 2 } as const;
-  return items.sort((a, b) => order[a.priority] - order[b.priority]);
+  return items.sort((a, b) => order[a.priority] - order[b.priority] || b.estimatedGain - a.estimatedGain);
 }
 
 /**
@@ -168,6 +205,18 @@ function legacyCategories(result: AnalysisResult): CategoryDetail[] {
   });
 }
 
+/** The published weighting behind the overall score. */
+function breakdownFrom(categories: CategoryDetail[]): ScoreBreakdownItem[] {
+  return categories.map((category) => ({
+    id: category.id,
+    label: category.label,
+    score: category.score,
+    weight: CATEGORY_WEIGHT[category.id],
+    contribution: Math.round((category.score * CATEGORY_WEIGHT[category.id]) / 100),
+    explanation: CATEGORY_WEIGHT_REASON[category.id],
+  }));
+}
+
 export function buildDashboardReport(result: AnalysisResult): DashboardReport {
   const base = {
     url: result.url,
@@ -177,10 +226,12 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
   };
 
   if (!result.evidence) {
+    const legacy = legacyCategories(result);
     return {
       ...base,
       overallScore: result.overallScore,
-      categories: legacyCategories(result),
+      breakdown: breakdownFrom(legacy),
+      categories: legacy,
       business: [],
       recommendations: [],
       understanding: null,
@@ -191,12 +242,16 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
 
   const { categories, factors } = categoriesFrom(result);
   const overallScore = Math.round(
-    categories.reduce((sum, category) => sum + category.score, 0) / categories.length,
+    categories.reduce(
+      (sum, category) => sum + (category.score * CATEGORY_WEIGHT[category.id]) / 100,
+      0,
+    ),
   );
 
   return {
     ...base,
     overallScore,
+    breakdown: breakdownFrom(categories),
     categories,
     business: businessFrom(factors),
     recommendations: recommendationsFrom(factors),
