@@ -103,6 +103,8 @@ export type DashboardReport = {
   displayUrl: string;
   completedAt: string;
   overallScore: number;
+  /** Published weighting behind the overall score. */
+  breakdown: ScoreBreakdownItem[];
   categories: CategoryDetail[];
   business: BusinessMetric[];
   recommendations: Recommendation[];
