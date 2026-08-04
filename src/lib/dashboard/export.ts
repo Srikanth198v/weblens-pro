@@ -7,8 +7,16 @@ export function reportToText(report: DashboardReport): string {
     `WebLens AI — Analysis for ${report.displayUrl}`,
     `Overall score: ${report.overallScore}/100 (${STATUS_LABEL[statusForScore(report.overallScore)]})`,
     "",
-    "Category scores",
+    "Score breakdown (weighted)",
   ];
+
+  for (const item of report.breakdown) {
+    lines.push(
+      `- ${item.label}: ${item.score}/100 · weight ${item.weight}% · contributes ${item.contribution} points`,
+    );
+  }
+
+  lines.push("", "Category scores");
 
   for (const category of report.categories) {
     lines.push(`- ${category.label}: ${category.score}/100 — ${category.summary}`);
@@ -22,7 +30,9 @@ export function reportToText(report: DashboardReport): string {
   lines.push("", "Recommendations");
   for (const item of report.recommendations) {
     lines.push(
-      `- [${item.priority.toUpperCase()}] ${item.title} — impact ${item.impact}, ${item.difficulty}, ${item.estimatedTime}`,
+      `- [${item.priority.toUpperCase()}] ${item.title} — impact ${item.impact}, ${item.difficulty}, ${item.estimatedTime}, est. +${item.estimatedGain} points`,
+      `  Detected: ${item.currentState}`,
+      `  Recommended: ${item.recommendedState}`,
     );
   }
 
