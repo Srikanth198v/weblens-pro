@@ -197,6 +197,18 @@ function legacyCategories(result: AnalysisResult): CategoryDetail[] {
   });
 }
 
+/** The published weighting behind the overall score. */
+function breakdownFrom(categories: CategoryDetail[]): ScoreBreakdownItem[] {
+  return categories.map((category) => ({
+    id: category.id,
+    label: category.label,
+    score: category.score,
+    weight: CATEGORY_WEIGHT[category.id],
+    contribution: Math.round((category.score * CATEGORY_WEIGHT[category.id]) / 100),
+    explanation: CATEGORY_WEIGHT_REASON[category.id],
+  }));
+}
+
 export function buildDashboardReport(result: AnalysisResult): DashboardReport {
   const base = {
     url: result.url,
@@ -206,10 +218,12 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
   };
 
   if (!result.evidence) {
+    const legacy = legacyCategories(result);
     return {
       ...base,
       overallScore: result.overallScore,
-      categories: legacyCategories(result),
+      breakdown: breakdownFrom(legacy),
+      categories: legacy,
       business: [],
       recommendations: [],
       understanding: null,
@@ -220,12 +234,16 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
 
   const { categories, factors } = categoriesFrom(result);
   const overallScore = Math.round(
-    categories.reduce((sum, category) => sum + category.score, 0) / categories.length,
+    categories.reduce(
+      (sum, category) => sum + (category.score * CATEGORY_WEIGHT[category.id]) / 100,
+      0,
+    ),
   );
 
   return {
     ...base,
     overallScore,
+    breakdown: breakdownFrom(categories),
     categories,
     business: businessFrom(factors),
     recommendations: recommendationsFrom(factors),
