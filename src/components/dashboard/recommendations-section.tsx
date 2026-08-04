@@ -1,10 +1,13 @@
 import {
   Accessibility,
   Briefcase,
+  Check,
+  ChevronDown,
   Gauge,
   LayoutDashboard,
   Search,
   Sparkles,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -145,9 +148,10 @@ function BeforeAfter({ item }: { item: Recommendation }) {
     <details className="group mt-3 rounded-xl border border-border bg-surface">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
         Before vs after
-        <span className="text-xs font-medium text-muted-foreground transition-transform duration-200 group-open:rotate-180">
-          ▾
-        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+        />
       </summary>
 
       <div className="space-y-3 border-t border-border px-4 py-4">
@@ -155,18 +159,18 @@ function BeforeAfter({ item }: { item: Recommendation }) {
           <p className="text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             Current state
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-foreground/85">
-            <span aria-hidden="true">❌ </span>
-            {item.currentState}
+          <p className="mt-1 flex gap-2 text-sm leading-relaxed text-foreground/85">
+            <X aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
+            <span>{item.currentState}</span>
           </p>
         </div>
         <div>
           <p className="text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             Recommended
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-foreground/85">
-            <span aria-hidden="true">✅ </span>
-            {item.recommendedState}
+          <p className="mt-1 flex gap-2 text-sm leading-relaxed text-foreground/85">
+            <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span>{item.recommendedState}</span>
           </p>
         </div>
         <div>
