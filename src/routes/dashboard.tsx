@@ -5,6 +5,7 @@ import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-stat
 import { DashboardErrorState } from "@/components/dashboard/dashboard-error-state";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { OverallScore } from "@/components/dashboard/overall-score";
+import { ScoreBreakdown } from "@/components/dashboard/score-breakdown";
 import { QuickSummary } from "@/components/dashboard/quick-summary";
 import { SectionNav } from "@/components/dashboard/section-nav";
 import { WebsitePreviewCard } from "@/components/dashboard/website-preview-card";
@@ -152,8 +153,17 @@ function DashboardContent({
       </DashboardSection>
 
       <DashboardSection
-        id="summary"
+        id="breakdown"
         eyebrow="Section 04"
+        title="Score Breakdown"
+        description="Exactly how the overall number is made up, area by area."
+      >
+        <ScoreBreakdown report={report} />
+      </DashboardSection>
+
+      <DashboardSection
+        id="summary"
+        eyebrow="Section 05"
         title="Quick Summary"
         description="Where the site stands in each core area."
       >
@@ -162,7 +172,7 @@ function DashboardContent({
 
       <DashboardSection
         id="details"
-        eyebrow="Section 05"
+        eyebrow="Section 06"
         title="Detailed Analysis"
         description="Open any area to see what is working, what isn't, and what to do next."
       >
@@ -173,7 +183,7 @@ function DashboardContent({
 
       <DashboardSection
         id="business"
-        eyebrow="Section 06"
+        eyebrow="Section 07"
         title="Business Review"
         description="How the site performs as a business asset, not just as a webpage."
       >
@@ -184,7 +194,7 @@ function DashboardContent({
 
       <DashboardSection
         id="intelligence"
-        eyebrow="Section 07"
+        eyebrow="Section 08"
         title="WebLens Intelligence"
         description="Consultant-style guidance: what to change, why it matters, and what it takes."
       >
@@ -195,7 +205,7 @@ function DashboardContent({
 
       <DashboardSection
         id="recommendations"
-        eyebrow="Section 08"
+        eyebrow="Section 09"
         title="Recommendations"
         description="Every action from this analysis, grouped by priority."
       >
@@ -204,7 +214,7 @@ function DashboardContent({
         </Suspense>
       </DashboardSection>
 
-      <DashboardSection id="export" eyebrow="Section 09" title="Export">
+      <DashboardSection id="export" eyebrow="Section 10" title="Export">
         <Suspense fallback={<SectionFallback />}>
           <ExportArea report={report} />
         </Suspense>
