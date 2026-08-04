@@ -2,6 +2,13 @@ import { EVIDENCE_SOURCE_LABEL, type EvidenceSourceId } from "@/lib/analysis/evi
 import { evaluateEvidence, type EvidenceFactor } from "@/lib/analysis/score-from-evidence";
 import { buildUnderstanding } from "@/lib/analysis/understanding";
 import type { AnalysisResult } from "@/lib/analysis/types";
+import {
+  CATEGORY_BUSINESS_IMPACT,
+  CATEGORY_EXPECTED_RESULTS,
+  CATEGORY_WEIGHT,
+  CATEGORY_WEIGHT_REASON,
+  CATEGORY_WHY_IT_MATTERS,
+} from "@/lib/dashboard/weights";
 import type {
   BusinessMetric,
   CategoryDetail,
@@ -10,6 +17,7 @@ import type {
   Recommendation,
   RecommendationPriority,
   ReportConfidence,
+  ScoreBreakdownItem,
 } from "@/lib/dashboard/types";
 
 /**
