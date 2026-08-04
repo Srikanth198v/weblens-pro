@@ -20,6 +20,7 @@ const ICONS: Record<string, LucideIcon> = {
   monitor: Monitor,
   compass: Compass,
   gauge: Gauge,
+  "sliders-horizontal": SlidersHorizontal,
   "layout-grid": LayoutGrid,
   "list-checks": ListChecks,
   briefcase: Briefcase,
