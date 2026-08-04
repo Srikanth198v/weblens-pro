@@ -7,6 +7,7 @@ import {
   Lightbulb,
   ListChecks,
   Monitor,
+  SlidersHorizontal,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
