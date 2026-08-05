@@ -1,4 +1,15 @@
-import { Globe, PlugZap, SearchX, TimerOff, Unplug, type LucideIcon } from "lucide-react";
+import {
+  Globe,
+  Lock,
+  PlugZap,
+  SearchX,
+  ServerCrash,
+  ShieldAlert,
+  TimerOff,
+  Unplug,
+  type LucideIcon,
+} from "lucide-react";
+
 
 import type { VerificationFailureCode } from "@/lib/verification/types";
 
