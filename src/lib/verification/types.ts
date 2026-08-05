@@ -10,7 +10,11 @@ export type VerificationFailureCode =
   | "not-found"
   | "offline"
   | "unreachable"
-  | "timeout";
+  | "timeout"
+  | "blocked"
+  | "ssl"
+  | "server-error";
+
 
 export type VerificationCheckId = "reachable" | "https" | "responded";
 
