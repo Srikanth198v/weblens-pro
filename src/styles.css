@@ -470,3 +470,51 @@
     transform: none;
   }
 }
+
+/*
+ * Production polish (Phase 6.5)
+ * Safe-area padding for notched phones, long-URL wrapping and print rules.
+ */
+@utility safe-x {
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+
+@utility safe-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+/** Long URLs and hashes must never push a card wider than the viewport. */
+@utility break-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  header,
+  nav,
+  button {
+    display: none !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+    max-width: none !important;
+  }
+}

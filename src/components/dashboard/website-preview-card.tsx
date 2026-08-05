@@ -24,7 +24,7 @@ export function WebsitePreviewCard({
           <p className="truncate text-base font-semibold text-foreground sm:text-lg">
             {report.siteName}
           </p>
-          <p className="truncate text-sm text-muted-foreground">{report.displayUrl}</p>
+          <p className="break-anywhere text-sm text-muted-foreground">{report.displayUrl}</p>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">

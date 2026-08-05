@@ -1,4 +1,15 @@
-import { Globe, PlugZap, SearchX, TimerOff, Unplug, type LucideIcon } from "lucide-react";
+import {
+  Globe,
+  Lock,
+  PlugZap,
+  SearchX,
+  ServerCrash,
+  ShieldAlert,
+  TimerOff,
+  Unplug,
+  type LucideIcon,
+} from "lucide-react";
+
 
 import type { VerificationFailureCode } from "@/lib/verification/types";
 
@@ -65,4 +76,38 @@ export const VERIFICATION_ERROR_COPY: Record<VerificationFailureCode, Verificati
       "A second attempt often succeeds",
     ],
   },
+  blocked: {
+    icon: ShieldAlert,
+    title: "We couldn't reach this site from our checker",
+    description:
+      "The site answered, but it declined our request. That's usually protection on their side, not a problem with the site itself.",
+    reasons: [
+      "A firewall or bot filter may be turning away automated checks",
+      "The page may need a sign-in to view",
+      "The site may only be available in certain regions",
+    ],
+  },
+  ssl: {
+    icon: Lock,
+    title: "We couldn't verify this site's secure connection",
+    description:
+      "Based on the available evidence, the HTTPS certificate couldn't be confirmed, so we stopped rather than analyze an unverified connection.",
+    reasons: [
+      "The certificate may have expired or been renewed recently",
+      "It may not cover this exact address",
+      "The connection may have been interrupted mid-check",
+    ],
+  },
+  "server-error": {
+    icon: ServerCrash,
+    title: "The website reported a problem on its side",
+    description:
+      "The server answered with an error, so there was no page for us to analyze at this moment.",
+    reasons: [
+      "The site may be mid-deploy or under maintenance",
+      "The error may only affect this one address",
+      "Trying again shortly often works",
+    ],
+  },
+
 };

@@ -31,7 +31,7 @@ function ReportsPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
-      <main className="mx-auto w-full max-w-[76rem] px-5 pt-24 pb-28 sm:px-8 sm:pt-28">
+      <main id="main-content" className="motion-page-enter safe-x mx-auto w-full max-w-[76rem] px-5 pt-24 pb-28 sm:px-8 sm:pt-28">
         <header className="pb-8">
           <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">Library</p>
           <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">

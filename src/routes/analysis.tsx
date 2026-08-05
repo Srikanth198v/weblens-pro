@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
+
 
 import { AnalysisComplete } from "@/components/analysis/analysis-complete";
 import { AnalysisErrorState } from "@/components/analysis/analysis-error-state";
@@ -67,7 +68,7 @@ function AnalysisPage() {
     <div className="relative min-h-screen overflow-hidden bg-background">
       <AmbientBackground />
 
-      <main className="relative mx-auto flex min-h-screen w-full max-w-[72rem] flex-col items-center justify-center gap-8 px-5 py-16 sm:px-8 lg:gap-10">
+      <main id="main-content" className="motion-page-enter safe-x relative mx-auto flex min-h-screen w-full max-w-[72rem] flex-col items-center justify-center gap-8 px-5 py-16 sm:px-8 lg:gap-10">
         <div className="flex flex-col items-center gap-3 text-center">
           <BrandMark />
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
@@ -103,6 +104,14 @@ function AnalysisRunner({ url, checks }: { url: string; checks: VerificationChec
   const { percent, stageId, statusMessage, status, retry } = useAnalysisRun(url);
   const [leaving, setLeaving] = useState(false);
 
+  // Guard against losing an in-flight analysis to a stray back gesture or refresh.
+  useBlocker({
+    shouldBlockFn: () =>
+      status === "running" &&
+      !window.confirm("This analysis is still running. Leave and discard the results?"),
+    enableBeforeUnload: status === "running",
+  });
+
   useEffect(() => {
     if (status !== "complete") return;
     const fade = window.setTimeout(() => setLeaving(true), HOLD_MS);
@@ -114,6 +123,7 @@ function AnalysisRunner({ url, checks }: { url: string; checks: VerificationChec
       window.clearTimeout(go);
     };
   }, [status, navigate]);
+
 
   if (status === "failed") {
     return <AnalysisErrorState url={url} onRetry={retry} />;

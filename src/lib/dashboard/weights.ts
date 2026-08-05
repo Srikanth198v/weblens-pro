@@ -61,4 +61,4 @@ export const CATEGORY_EXPECTED_RESULTS: Record<CategoryId, string[]> = {
 };
 
 export const OVERALL_SCORE_METHOD =
-  "The overall score is a weighted average of five measured areas. Each area is scored only from signals read on your page — nothing is estimated or assumed.";
+  "The overall score is a weighted average of five measured areas. Each area is scored only from signals we could read on your page during this analysis — nothing is estimated or assumed.";
