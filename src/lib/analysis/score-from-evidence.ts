@@ -94,7 +94,7 @@ function designFactors(e: SiteEvidence): EvidenceFactor[] {
         e.headings.h1.length === 1
           ? `Exactly one H1 on the page: “${e.headings.h1[0]}”`
           : e.headings.h1.length === 0
-            ? "No H1 heading found, so the page has no declared focal point"
+            ? "No H1 heading detected during this analysis, so the page has no declared focal point"
             : `${e.headings.h1.length} H1 headings compete as the page's focal point: ${e.headings.h1
                 .slice(0, 3)
                 .map((h) => `“${h}”`)
@@ -326,7 +326,7 @@ function performanceFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Image delivery",
       detail:
         e.images.total === 0
-          ? "No <img> elements found on the page"
+          ? "No <img> elements detected during this analysis on the page"
           : `${e.images.total} images: ${e.images.lazy} lazy-loaded, ${e.images.modernFormats} in a modern format (WebP/AVIF)`,
       score:
         e.images.total === 0
@@ -370,7 +370,7 @@ function seoFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Page title",
       detail: e.metadata.title
         ? `Title is ${titleLength} characters: “${e.metadata.title}”`
-        : "No <title> element found",
+        : "No <title> element detected during this analysis",
       score: !e.metadata.title ? 20 : titleLength >= 20 && titleLength <= 60 ? 100 : 65,
       weight: 3,
       ...(!e.metadata.title || titleLength < 20 || titleLength > 60
@@ -397,7 +397,7 @@ function seoFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Meta description",
       detail: e.metadata.description
         ? `Description is ${descriptionLength} characters: “${e.metadata.description}”`
-        : "No meta description found",
+        : "No meta description detected during this analysis",
       score: !e.metadata.description ? 25 : descriptionLength >= 70 && descriptionLength <= 160 ? 100 : 70,
       weight: 2,
       ...(!e.metadata.description || descriptionLength < 70 || descriptionLength > 160
@@ -457,7 +457,7 @@ function seoFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Structured data",
       detail: e.structuredData.present
         ? `JSON-LD found describing: ${e.structuredData.types.join(", ") || "unnamed types"}`
-        : "No JSON-LD structured data found",
+        : "No JSON-LD structured data detected during this analysis",
       score: e.structuredData.present ? 100 : 40,
       weight: 2,
       ...(e.structuredData.present
@@ -467,7 +467,7 @@ function seoFactors(e: SiteEvidence): EvidenceFactor[] {
             remedy: {
               title: "Add structured data for the business",
               description:
-                "No JSON-LD was found on the page, so search engines cannot show rich details such as name, logo, contact or ratings.",
+                "No JSON-LD was detected during this analysis on the page, so search engines cannot show rich details such as name, logo, contact or ratings.",
               impact: "Medium",
               difficulty: "Moderate",
               estimatedTime: "2 hours",
@@ -550,7 +550,7 @@ function accessibilityFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Image alternative text",
       detail:
         e.images.total === 0
-          ? "No <img> elements found, so no alt text is required"
+          ? "No <img> elements detected during this analysis, so no alt text is required"
           : `${e.images.total} images detected, ${e.images.missingAlt} missing an alt attribute`,
       score: e.images.total === 0 ? 90 : scale(described / e.images.total, 1, 0),
       weight: 3,
@@ -602,7 +602,7 @@ function accessibilityFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Form labelling",
       detail:
         e.forms.inputs === 0
-          ? "No form fields found on the page"
+          ? "No form fields detected during this analysis on the page"
           : `${e.forms.inputs} form field${e.forms.inputs === 1 ? "" : "s"} with ${e.forms.labels} <label> element${
               e.forms.labels === 1 ? "" : "s"
             } and ${e.forms.ariaLabels} aria-label${e.forms.ariaLabels === 1 ? "" : "s"}`,
@@ -680,8 +680,8 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
             e.content.ctas.length === 1 ? "" : "s"
           } found: ${e.content.ctas.join(", ")}`
         : e.forms.total > 0
-          ? `No call-to-action button found, though ${e.forms.total} form${e.forms.total === 1 ? "" : "s"} appear on the page`
-          : "No call-to-action button or form found on the page",
+          ? `No call-to-action button detected during this analysis, though ${e.forms.total} form${e.forms.total === 1 ? "" : "s"} appear on the page`
+          : "No call-to-action button or form detected during this analysis on the page",
       score: e.content.ctas.length === 1 ? 100 : e.content.ctas.length > 1 ? 80 : e.forms.total ? 60 : 30,
       weight: 3,
       ...(e.content.ctas.length === 1
@@ -696,7 +696,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
                 ? `The page offers ${e.content.ctas.length} competing actions (${e.content.ctas.join(
                     ", ",
                   )}). Promoting one and demoting the rest makes the intended path obvious.`
-                : "No recognised action button was found, so an interested visitor has no obvious next step.",
+                : "No recognised action button was detected during this analysis, so an interested visitor has no obvious next step.",
               impact: "High",
               difficulty: "Easy",
               estimatedTime: "1 hour",
@@ -712,7 +712,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Customer proof",
       detail: e.content.hasTestimonials
         ? "Testimonial, review or case-study language appears in the page copy"
-        : "No testimonial, review or case-study language found in the page copy",
+        : "No testimonial, review or case-study language detected during this analysis in the page copy",
       score: e.content.hasTestimonials ? 95 : 40,
       weight: 2,
       ...(e.content.hasTestimonials
@@ -722,7 +722,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
             remedy: {
               title: "Add customer proof to the page",
               description:
-                "No testimonials, reviews or case studies were found in the homepage copy, so every claim currently rests on your own word.",
+                "No testimonials, reviews or case studies were detected during this analysis in the homepage copy, so every claim currently rests on your own word.",
               impact: "High",
               difficulty: "Moderate",
               estimatedTime: "3–5 hours",
@@ -739,7 +739,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
       detail:
         e.links.hasPricing || e.content.hasPricingSection
           ? `Pricing is addressed on the page${e.links.hasPricing ? " and linked from the navigation" : ""}`
-          : "No pricing link or pricing language found",
+          : "No pricing link or pricing language detected during this analysis",
       score: e.links.hasPricing ? 100 : e.content.hasPricingSection ? 75 : 45,
       weight: 2,
       ...(e.links.hasPricing
@@ -749,7 +749,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
             remedy: {
               title: "Make pricing findable",
               description:
-                "No pricing link was found in the navigation, so visitors comparing options have to ask before they can compare.",
+                "No pricing link was detected during this analysis in the navigation, so visitors comparing options have to ask before they can compare.",
               impact: "Medium",
               difficulty: "Moderate",
               estimatedTime: "2–3 hours",
@@ -770,7 +770,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
         e.forms.total ? `${e.forms.total} form${e.forms.total === 1 ? "" : "s"}` : null,
       ]
         .filter(Boolean)
-        .join(", ") || "No email link, phone link, contact link or form found",
+        .join(", ") || "No email link, phone link, contact link or form detected during this analysis",
       score:
         (e.links.mailto || e.links.tel ? 45 : 0) +
         (e.links.hasContact ? 35 : 0) +
@@ -799,7 +799,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Navigation clarity",
       detail: e.links.nav.length
         ? `${e.links.nav.length} primary navigation items: ${e.links.nav.join(", ")}`
-        : `No <nav> landmark found; ${e.links.total} links appear on the page`,
+        : `No <nav> landmark detected during this analysis; ${e.links.total} links appear on the page`,
       score:
         e.links.nav.length === 0
           ? 45
