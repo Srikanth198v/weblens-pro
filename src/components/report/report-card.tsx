@@ -33,7 +33,7 @@ export function ReportCard({
       <div className="mt-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-base font-semibold text-foreground">{report.siteName}</h3>
-          <p className="truncate text-xs text-muted-foreground">{report.displayUrl}</p>
+          <p className="break-anywhere line-clamp-2 text-xs text-muted-foreground">{report.displayUrl}</p>
           <p className="mt-1 text-xs text-muted-foreground">
             {new Date(report.completedAt).toLocaleDateString()}
           </p>
