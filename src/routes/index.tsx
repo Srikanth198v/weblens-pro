@@ -32,7 +32,7 @@ function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav onAnalyzeClick={() => formRef.current?.focus()} />
-      <main>
+      <main id="main-content">
         <HeroSection
           formRef={formRef}
           onAnalyze={(url) => {
