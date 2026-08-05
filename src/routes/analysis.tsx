@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
+
 
 import { AnalysisComplete } from "@/components/analysis/analysis-complete";
 import { AnalysisErrorState } from "@/components/analysis/analysis-error-state";
