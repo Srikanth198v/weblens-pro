@@ -61,6 +61,8 @@ export type Recommendation = {
   description: string;
   /** Measured facts that triggered this recommendation. Never empty. */
   evidence: string[];
+  /** Which analyses this finding came from, so its origin is never a mystery. */
+  sources: string[];
   /** Consultant framing: why the measurement is worth acting on. */
   whyItMatters: string;
   /** The commercial consequence of leaving it as-is. */
