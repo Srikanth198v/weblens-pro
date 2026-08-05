@@ -1,6 +1,7 @@
 /** Section registry — drives both the page order and the floating navigation. */
 export const DASHBOARD_SECTIONS = [
   { id: "preview", label: "Website Preview", short: "Preview", icon: "monitor" },
+  { id: "confidence", label: "AI Confidence", short: "Confidence", icon: "shield-check" },
   { id: "understanding", label: "Website Understanding", short: "Understanding", icon: "compass" },
   { id: "score", label: "Overall Score", short: "Score", icon: "gauge" },
   { id: "breakdown", label: "Score Breakdown", short: "Breakdown", icon: "sliders-horizontal" },
@@ -9,6 +10,8 @@ export const DASHBOARD_SECTIONS = [
   { id: "business", label: "Business Review", short: "Business", icon: "briefcase" },
   { id: "intelligence", label: "WebLens Intelligence", short: "Intelligence", icon: "sparkles" },
   { id: "recommendations", label: "Recommendations", short: "Actions", icon: "lightbulb" },
+  { id: "evidence", label: "Evidence Used", short: "Evidence", icon: "list-checks" },
+  { id: "methodology", label: "How This Report Was Generated", short: "Method", icon: "info" },
   { id: "export", label: "Export", short: "Export", icon: "download" },
 ] as const;
 

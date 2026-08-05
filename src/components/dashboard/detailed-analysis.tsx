@@ -70,24 +70,24 @@ export function DetailedAnalysis({ categories }: { categories: CategoryDetail[] 
 
             <div className="mt-6 grid gap-6 md:grid-cols-3">
               <DetailList
-                title="Strengths"
+                title="Positive findings"
                 items={category.strengths}
                 icon={<Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />}
-                emptyLabel="Nothing standing out here yet."
+                emptyLabel="No clear strengths detected during this analysis."
               />
               <DetailList
-                title="Weaknesses"
+                title="Issues detected"
                 items={category.weaknesses}
                 icon={
                   <Minus aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                 }
-                emptyLabel="No issues found in this area."
+                emptyLabel="No issues detected during this analysis."
               />
               <DetailList
-                title="Suggestions"
+                title="Suggested next steps"
                 items={category.suggestions}
                 icon={<Lightbulb aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />}
-                emptyLabel="Keep doing what you're doing."
+                emptyLabel="No further changes suggested based on collected evidence."
               />
             </div>
           </ExpandableCard>
