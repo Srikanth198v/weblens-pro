@@ -14,7 +14,7 @@ export function ReportHeader({ report, lead }: { report: DashboardReport; lead: 
         <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           {report.siteName}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="break-anywhere mt-2 text-sm text-muted-foreground">
           {report.displayUrl} · Analysed {new Date(report.completedAt).toLocaleDateString()}
         </p>
 
