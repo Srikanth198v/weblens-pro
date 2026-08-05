@@ -68,7 +68,7 @@ function AnalysisPage() {
     <div className="relative min-h-screen overflow-hidden bg-background">
       <AmbientBackground />
 
-      <main id="main-content" className="relative mx-auto flex min-h-screen w-full max-w-[72rem] flex-col items-center justify-center gap-8 px-5 py-16 sm:px-8 lg:gap-10">
+      <main id="main-content" className="motion-page-enter safe-x relative mx-auto flex min-h-screen w-full max-w-[72rem] flex-col items-center justify-center gap-8 px-5 py-16 sm:px-8 lg:gap-10">
         <div className="flex flex-col items-center gap-3 text-center">
           <BrandMark />
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">

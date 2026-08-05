@@ -75,7 +75,7 @@ function DashboardPage() {
     <div className="min-h-screen bg-background">
       <SiteNav />
 
-      <main id="main-content" className="mx-auto w-full max-w-[76rem] px-5 pt-24 pb-28 sm:px-8 sm:pt-28 xl:pr-24">
+      <main id="main-content" className="motion-page-enter safe-x mx-auto w-full max-w-[76rem] px-5 pt-24 pb-28 sm:px-8 sm:pt-28 xl:pr-24">
         {state.status === "loading" ? (
           <div className="space-y-4" aria-busy="true">
             <Skeleton className="h-64 w-full rounded-3xl" />
