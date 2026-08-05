@@ -3,6 +3,8 @@ import { lazy, Suspense, useMemo } from "react";
 
 import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
 import { DashboardErrorState } from "@/components/dashboard/dashboard-error-state";
+import { AiConfidenceCard } from "@/components/dashboard/ai-confidence-card";
+import { EvidenceSummary } from "@/components/dashboard/evidence-summary";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { SiteNav } from "@/components/layout/site-nav";
 import { ExecutiveSummary } from "@/components/report/executive-summary";
@@ -11,6 +13,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardReport } from "@/hooks/use-dashboard-report";
 import { buildReportView } from "@/lib/report/build-report-view";
 
+const MethodologySection = lazy(() =>
+  import("@/components/dashboard/methodology-section").then((m) => ({
+    default: m.MethodologySection,
+  })),
+);
 const StrengthsSection = lazy(() =>
   import("@/components/report/strengths-section").then((m) => ({ default: m.StrengthsSection })),
 );
@@ -97,6 +104,15 @@ function ReportBody({
         description="The whole analysis in three short paragraphs, written for anyone."
       >
         <ExecutiveSummary paragraphs={view.summary} />
+      </DashboardSection>
+
+      <DashboardSection
+        id="confidence"
+        eyebrow="Section 02"
+        title="AI Confidence"
+        description="How much of this page could be read, and how sure these findings are."
+      >
+        <AiConfidenceCard evidenceReport={report.evidenceReport} />
       </DashboardSection>
 
       <DashboardSection
