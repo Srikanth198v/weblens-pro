@@ -117,7 +117,7 @@ function ReportBody({
 
       <DashboardSection
         id="strengths"
-        eyebrow="Section 02"
+        eyebrow="Section 03"
         title="Strengths"
         description="What this site already does well, and why it matters commercially."
       >
@@ -128,7 +128,7 @@ function ReportBody({
 
       <DashboardSection
         id="opportunities"
-        eyebrow="Section 03"
+        eyebrow="Section 04"
         title="Improvement Opportunities"
         description="Grouped by effort so you can start with the changes that land quickest."
       >
@@ -139,7 +139,7 @@ function ReportBody({
 
       <DashboardSection
         id="roadmap"
-        eyebrow="Section 04"
+        eyebrow="Section 05"
         title="Priority Roadmap"
         description="The same actions in the order we would tackle them."
       >
@@ -148,7 +148,27 @@ function ReportBody({
         </Suspense>
       </DashboardSection>
 
-      <DashboardSection id="export" eyebrow="Section 05" title="Export Center">
+      <DashboardSection
+        id="evidence"
+        eyebrow="Section 06"
+        title="Evidence Used"
+        description="Every source checked for this analysis, including the ones we could not reach."
+      >
+        <EvidenceSummary evidenceReport={report.evidenceReport} />
+      </DashboardSection>
+
+      <DashboardSection
+        id="methodology"
+        eyebrow="Section 07"
+        title="How This Report Was Generated"
+        description="The steps behind these findings, and what sits outside their reach."
+      >
+        <Suspense fallback={<SectionFallback />}>
+          <MethodologySection evidenceReport={report.evidenceReport} />
+        </Suspense>
+      </DashboardSection>
+
+      <DashboardSection id="export" eyebrow="Section 08" title="Export Center">
         <Suspense fallback={<SectionFallback />}>
           <ExportCenter report={report} />
         </Suspense>
