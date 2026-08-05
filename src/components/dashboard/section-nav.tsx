@@ -71,8 +71,9 @@ export function SectionNav() {
 
       <nav
         aria-label="Dashboard sections"
-        className="fixed inset-x-3 bottom-3 z-30 rounded-2xl border border-border bg-card/90 p-1.5 shadow-lifted backdrop-blur-md xl:hidden print:hidden"
+        className="safe-bottom fixed inset-x-3 bottom-3 z-30 rounded-2xl border border-border bg-card/90 p-1.5 shadow-lifted backdrop-blur-md xl:hidden print:hidden"
       >
+
         <ul className="flex snap-x gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {DASHBOARD_SECTIONS.map((section) => {
             const Icon = ICONS[section.icon] ?? Monitor;
