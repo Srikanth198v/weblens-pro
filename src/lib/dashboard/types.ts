@@ -114,4 +114,6 @@ export type DashboardReport = {
   understanding: WebsiteUnderstanding | null;
   evidence: SiteEvidence | null;
   confidence: ReportConfidence;
+  /** Auditable ledger of what was collected, what wasn't, and how sure we are. */
+  evidenceReport: EvidenceReport;
 };
