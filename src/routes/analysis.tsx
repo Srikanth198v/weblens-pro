@@ -104,6 +104,14 @@ function AnalysisRunner({ url, checks }: { url: string; checks: VerificationChec
   const { percent, stageId, statusMessage, status, retry } = useAnalysisRun(url);
   const [leaving, setLeaving] = useState(false);
 
+  // Guard against losing an in-flight analysis to a stray back gesture or refresh.
+  useBlocker({
+    shouldBlockFn: () =>
+      status === "running" &&
+      !window.confirm("This analysis is still running. Leave and discard the results?"),
+    enableBeforeUnload: status === "running",
+  });
+
   useEffect(() => {
     if (status !== "complete") return;
     const fade = window.setTimeout(() => setLeaving(true), HOLD_MS);
@@ -115,6 +123,7 @@ function AnalysisRunner({ url, checks }: { url: string; checks: VerificationChec
       window.clearTimeout(go);
     };
   }, [status, navigate]);
+
 
   if (status === "failed") {
     return <AnalysisErrorState url={url} onRetry={retry} />;
