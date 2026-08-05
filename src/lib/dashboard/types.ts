@@ -10,6 +10,7 @@
  */
 
 import type { EvidenceSourceId, SiteEvidence, WebsiteUnderstanding } from "@/lib/analysis/evidence";
+import type { EvidenceReport } from "@/lib/dashboard/evidence-report";
 
 export type ScoreStatus = "excellent" | "good" | "needs-improvement";
 
