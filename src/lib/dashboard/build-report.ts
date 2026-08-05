@@ -1,4 +1,5 @@
 import { EVIDENCE_SOURCE_LABEL, type EvidenceSourceId } from "@/lib/analysis/evidence";
+import { buildEvidenceReport } from "@/lib/dashboard/evidence-report";
 import { evaluateEvidence, type EvidenceFactor } from "@/lib/analysis/score-from-evidence";
 import { buildUnderstanding } from "@/lib/analysis/understanding";
 import type { AnalysisResult } from "@/lib/analysis/types";
@@ -62,6 +63,18 @@ function confidenceFor(used: EvidenceSourceId[]): ReportConfidence {
   };
 }
 
+/**
+ * Where each finding came from. Recommendations always name their origin so
+ * a reader can trace the conclusion back to the analysis that produced it.
+ */
+const RECOMMENDATION_SOURCES: Record<CategoryId, string[]> = {
+  design: ["HTML structure", "Heading structure", "Page content"],
+  performance: ["Load measurements", "HTML structure"],
+  seo: ["Metadata", "Structured data", "HTML structure"],
+  accessibility: ["Accessibility markup", "Images", "Heading structure"],
+  business: ["Business understanding", "Internal links", "Page content"],
+};
+
 function priorityFor(factor: EvidenceFactor): RecommendationPriority {
   const impact = factor.remedy?.impact ?? "Medium";
   if (factor.verdict === "fail") return impact === "Low" ? "medium" : "high";
@@ -101,6 +114,7 @@ function recommendationsFrom(factors: EvidenceFactor[]): Recommendation[] {
         title: remedy.title,
         description: remedy.description,
         evidence: [factor.detail, ...(factor.improvement ? [factor.improvement] : [])],
+        sources: RECOMMENDATION_SOURCES[factor.category],
         whyItMatters: CATEGORY_WHY_IT_MATTERS[factor.category],
         businessImpact: CATEGORY_BUSINESS_IMPACT[factor.category],
         howToFix: [fix, `Re-run the analysis afterwards to confirm “${factor.label}” now passes.`],
@@ -237,6 +251,7 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
       understanding: null,
       evidence: null,
       confidence: confidenceFor([]),
+      evidenceReport: buildEvidenceReport(null),
     };
   }
 
@@ -258,5 +273,6 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
     understanding: result.understanding ?? buildUnderstanding(result.evidence),
     evidence: result.evidence,
     confidence: confidenceFor(result.evidence.sources),
+    evidenceReport: buildEvidenceReport(result.evidence),
   };
 }
