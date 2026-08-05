@@ -326,7 +326,7 @@ function performanceFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Image delivery",
       detail:
         e.images.total === 0
-          ? "No <img> elements detected during this analysis on the page"
+          ? "No <img> elements detected on the page during this analysis"
           : `${e.images.total} images: ${e.images.lazy} lazy-loaded, ${e.images.modernFormats} in a modern format (WebP/AVIF)`,
       score:
         e.images.total === 0
@@ -467,7 +467,7 @@ function seoFactors(e: SiteEvidence): EvidenceFactor[] {
             remedy: {
               title: "Add structured data for the business",
               description:
-                "No JSON-LD was detected during this analysis on the page, so search engines cannot show rich details such as name, logo, contact or ratings.",
+                "No JSON-LD was detected on the page during this analysis, so search engines cannot show rich details such as name, logo, contact or ratings.",
               impact: "Medium",
               difficulty: "Moderate",
               estimatedTime: "2 hours",
@@ -602,7 +602,7 @@ function accessibilityFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Form labelling",
       detail:
         e.forms.inputs === 0
-          ? "No form fields detected during this analysis on the page"
+          ? "No form fields detected on the page during this analysis"
           : `${e.forms.inputs} form field${e.forms.inputs === 1 ? "" : "s"} with ${e.forms.labels} <label> element${
               e.forms.labels === 1 ? "" : "s"
             } and ${e.forms.ariaLabels} aria-label${e.forms.ariaLabels === 1 ? "" : "s"}`,
@@ -681,7 +681,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
           } found: ${e.content.ctas.join(", ")}`
         : e.forms.total > 0
           ? `No call-to-action button detected during this analysis, though ${e.forms.total} form${e.forms.total === 1 ? "" : "s"} appear on the page`
-          : "No call-to-action button or form detected during this analysis on the page",
+          : "No call-to-action button or form detected on the page during this analysis",
       score: e.content.ctas.length === 1 ? 100 : e.content.ctas.length > 1 ? 80 : e.forms.total ? 60 : 30,
       weight: 3,
       ...(e.content.ctas.length === 1
@@ -712,7 +712,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
       label: "Customer proof",
       detail: e.content.hasTestimonials
         ? "Testimonial, review or case-study language appears in the page copy"
-        : "No testimonial, review or case-study language detected during this analysis in the page copy",
+        : "No testimonial, review or case-study language detected in the page copy during this analysis",
       score: e.content.hasTestimonials ? 95 : 40,
       weight: 2,
       ...(e.content.hasTestimonials
@@ -722,7 +722,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
             remedy: {
               title: "Add customer proof to the page",
               description:
-                "No testimonials, reviews or case studies were detected during this analysis in the homepage copy, so every claim currently rests on your own word.",
+                "No testimonials, reviews or case studies were detected in the homepage copy during this analysis, so every claim currently rests on your own word.",
               impact: "High",
               difficulty: "Moderate",
               estimatedTime: "3–5 hours",
@@ -749,7 +749,7 @@ function businessFactors(e: SiteEvidence): EvidenceFactor[] {
             remedy: {
               title: "Make pricing findable",
               description:
-                "No pricing link was detected during this analysis in the navigation, so visitors comparing options have to ask before they can compare.",
+                "No pricing link was detected in the navigation during this analysis, so visitors comparing options have to ask before they can compare.",
               impact: "Medium",
               difficulty: "Moderate",
               estimatedTime: "2–3 hours",
