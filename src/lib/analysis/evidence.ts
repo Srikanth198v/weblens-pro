@@ -140,9 +140,15 @@ export type WebsiteUnderstanding = {
   /** Two to three sentences describing the site in plain language. */
   summary: string;
   industry: string;
+  /** Business model read from the page, or an explicit "not stated". */
+  businessType: string;
   purpose: string;
   audience: string;
   primaryGoal: string;
+  /** The exact label of the most prominent call to action, if one exists. */
+  primaryCta: string | null;
+  /** The next step the page appears to want a visitor to take. */
+  mainUserAction: string;
   keyFeatures: string[];
   positioning: string;
   /** The exact page facts this understanding was drawn from. */

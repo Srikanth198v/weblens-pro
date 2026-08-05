@@ -83,6 +83,33 @@ export function buildUnderstanding(evidence: SiteEvidence): WebsiteUnderstanding
     return UNKNOWN;
   })();
 
+  const businessType = (() => {
+    if (/\b(cart|checkout|add to (bag|cart)|shop now|shipping)\b/i.test(haystack)) {
+      return "Online store selling directly to visitors";
+    }
+    if (evidence.content.hasPricingSection || evidence.links.hasPricing) {
+      return "Product or service with published pricing";
+    }
+    if (evidence.forms.total > 0 && evidence.links.hasContact) {
+      return "Enquiry-led business collecting leads through the site";
+    }
+    if (evidence.links.hasBlog && evidence.content.wordCount > 800) {
+      return "Content-led site publishing articles or updates";
+    }
+    if (evidence.content.ctas.length > 0) {
+      return "Marketing site pointing visitors to a single next step";
+    }
+    return UNKNOWN;
+  })();
+
+  const mainUserAction = primaryCta
+    ? `Select “${primaryCta}”`
+    : evidence.forms.total > 0
+      ? "Complete the form on the page"
+      : evidence.links.hasContact
+        ? "Open the contact page"
+        : UNKNOWN;
+
   const keyFeatures = (evidence.links.nav.length ? evidence.links.nav : evidence.headings.h2)
     .filter((label) => label.length > 1)
     .slice(0, 6);
@@ -156,9 +183,12 @@ export function buildUnderstanding(evidence: SiteEvidence): WebsiteUnderstanding
   return {
     summary,
     industry,
+    businessType,
     purpose,
     audience,
     primaryGoal,
+    primaryCta: primaryCta ?? null,
+    mainUserAction,
     keyFeatures,
     positioning,
     evidence: evidenceList,

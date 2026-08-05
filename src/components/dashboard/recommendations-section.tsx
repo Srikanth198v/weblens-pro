@@ -110,6 +110,19 @@ function RecommendationCard({ item }: { item: Recommendation }) {
           </ul>
         </Block>
 
+        <Block label="Source">
+          <ul className="flex flex-wrap gap-2">
+            {item.sources.map((source) => (
+              <li
+                key={source}
+                className="rounded-full bg-card px-3 py-1.5 text-xs font-medium text-foreground/80"
+              >
+                {source}
+              </li>
+            ))}
+          </ul>
+        </Block>
+
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <Block label="Why it matters" flush>
             <p className="text-sm leading-relaxed text-foreground/85">{item.whyItMatters}</p>

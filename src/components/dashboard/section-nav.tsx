@@ -3,10 +3,12 @@ import {
   Compass,
   Download,
   Gauge,
+  Info,
   LayoutGrid,
   Lightbulb,
   ListChecks,
   Monitor,
+  ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   type LucideIcon,
@@ -27,6 +29,8 @@ const ICONS: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   lightbulb: Lightbulb,
   download: Download,
+  "shield-check": ShieldCheck,
+  info: Info,
 };
 
 /**

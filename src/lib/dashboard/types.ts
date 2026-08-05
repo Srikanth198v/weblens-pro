@@ -10,6 +10,7 @@
  */
 
 import type { EvidenceSourceId, SiteEvidence, WebsiteUnderstanding } from "@/lib/analysis/evidence";
+import type { EvidenceReport } from "@/lib/dashboard/evidence-report";
 
 export type ScoreStatus = "excellent" | "good" | "needs-improvement";
 
@@ -60,6 +61,8 @@ export type Recommendation = {
   description: string;
   /** Measured facts that triggered this recommendation. Never empty. */
   evidence: string[];
+  /** Which analyses this finding came from, so its origin is never a mystery. */
+  sources: string[];
   /** Consultant framing: why the measurement is worth acting on. */
   whyItMatters: string;
   /** The commercial consequence of leaving it as-is. */
@@ -111,4 +114,6 @@ export type DashboardReport = {
   understanding: WebsiteUnderstanding | null;
   evidence: SiteEvidence | null;
   confidence: ReportConfidence;
+  /** Auditable ledger of what was collected, what wasn't, and how sure we are. */
+  evidenceReport: EvidenceReport;
 };
