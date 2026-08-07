@@ -16,10 +16,10 @@ import {
  * inventing a visual review.
  */
 
-const CAPTURE_ATTEMPTS = 3;
-const CAPTURE_DELAY_MS = 2500;
-/** Below this, the renderer is still returning a placeholder image. */
-const MIN_IMAGE_BYTES = 12_000;
+/** How many times we re-request a shot while the renderer is still working. */
+const CAPTURE_ATTEMPTS = 4;
+const CAPTURE_DELAY_MS = 6000;
+const MIN_IMAGE_BYTES = 8_000;
 
 const DIMENSION_IDS: VisualDimensionId[] = [
   "first-impression",
@@ -34,26 +34,40 @@ const PIN_KINDS = ["primary-focus", "secondary-focus", "cta", "distraction", "tr
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function toDataUrl(buffer: ArrayBuffer, type: string): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return `data:${type};base64,${btoa(binary)}`;
+}
+
+/**
+ * The renderer answers immediately with a placeholder while it is still
+ * loading the page, so we keep re-requesting until two consecutive responses
+ * are identical in size — that is the finished render.
+ */
 async function capture(url: string): Promise<string | null> {
+  let previousSize = -1;
+  let latest: string | null = null;
+
   for (let attempt = 0; attempt < CAPTURE_ATTEMPTS; attempt += 1) {
     try {
       const response = await fetch(url, { redirect: "follow" });
       if (response.ok) {
         const buffer = await response.arrayBuffer();
         if (buffer.byteLength >= MIN_IMAGE_BYTES) {
-          const bytes = new Uint8Array(buffer);
-          let binary = "";
-          for (const byte of bytes) binary += String.fromCharCode(byte);
-          const type = response.headers.get("content-type") ?? "image/jpeg";
-          return `data:${type};base64,${btoa(binary)}`;
+          latest = toDataUrl(buffer, response.headers.get("content-type") ?? "image/png");
+          if (buffer.byteLength === previousSize) return latest;
+          previousSize = buffer.byteLength;
         }
       }
     } catch {
       // Retry — the renderer is often still warming up.
     }
-    await wait(CAPTURE_DELAY_MS);
+    if (attempt < CAPTURE_ATTEMPTS - 1) await wait(CAPTURE_DELAY_MS);
   }
-  return null;
+
+  return latest;
 }
 
 const PROMPT = `You are a senior web design consultant reviewing a website from screenshots only.
