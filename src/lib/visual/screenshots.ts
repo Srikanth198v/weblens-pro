@@ -1,0 +1,22 @@
+import type { VisualScreenshots } from "@/lib/visual/types";
+
+/**
+ * Screenshot capture URLs.
+ *
+ * We use a public rendering service so no key or setup is required. The images
+ * are requested lazily by the browser; nothing is stored by WebLens.
+ */
+
+const ENDPOINT = "https://image.thum.io/get";
+
+export const DESKTOP_WIDTH = 1440;
+export const MOBILE_WIDTH = 390;
+
+export function screenshotUrls(url: string): VisualScreenshots {
+  return {
+    desktop: `${ENDPOINT}/wait/8/width/${DESKTOP_WIDTH}/crop/900/${url}`,
+    mobile: `${ENDPOINT}/wait/8/viewportWidth/${MOBILE_WIDTH}/width/${MOBILE_WIDTH}/crop/844/${url}`,
+    // No crop means the renderer captures the page in full.
+    fullPage: `${ENDPOINT}/wait/8/width/${DESKTOP_WIDTH}/${url}`,
+  };
+}
