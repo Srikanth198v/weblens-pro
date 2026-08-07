@@ -16,11 +16,6 @@ import {
  * inventing a visual review.
  */
 
-/** How many times we re-request a shot while the renderer is still working. */
-const CAPTURE_ATTEMPTS = 4;
-const CAPTURE_DELAY_MS = 6000;
-const MIN_IMAGE_BYTES = 8_000;
-
 const DIMENSION_IDS: VisualDimensionId[] = [
   "first-impression",
   "hierarchy",
@@ -31,44 +26,6 @@ const DIMENSION_IDS: VisualDimensionId[] = [
 ];
 
 const PIN_KINDS = ["primary-focus", "secondary-focus", "cta", "distraction", "trust-signal"];
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function toDataUrl(buffer: ArrayBuffer, type: string): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return `data:${type};base64,${btoa(binary)}`;
-}
-
-/**
- * The renderer answers immediately with a placeholder while it is still
- * loading the page, so we keep re-requesting until two consecutive responses
- * are identical in size — that is the finished render.
- */
-async function capture(url: string): Promise<string | null> {
-  let previousSize = -1;
-  let latest: string | null = null;
-
-  for (let attempt = 0; attempt < CAPTURE_ATTEMPTS; attempt += 1) {
-    try {
-      const response = await fetch(url, { redirect: "follow" });
-      if (response.ok) {
-        const buffer = await response.arrayBuffer();
-        if (buffer.byteLength >= MIN_IMAGE_BYTES) {
-          latest = toDataUrl(buffer, response.headers.get("content-type") ?? "image/png");
-          if (buffer.byteLength === previousSize) return latest;
-          previousSize = buffer.byteLength;
-        }
-      }
-    } catch {
-      // Retry — the renderer is often still warming up.
-    }
-    if (attempt < CAPTURE_ATTEMPTS - 1) await wait(CAPTURE_DELAY_MS);
-  }
-
-  return latest;
-}
 
 const PROMPT = `You are a senior web design consultant reviewing a website from screenshots only.
 The first image is the desktop view (1440px). The second, when present, is the mobile view (390px).
@@ -187,23 +144,8 @@ export const analyzeVisual = createServerFn({ method: "POST" })
     if (validation.status !== "valid") return null;
 
     const screenshots = screenshotUrls(validation.url);
-    const [desktopImage, mobileImage] = await Promise.all([
-      capture(screenshots.desktop!),
-      capture(screenshots.mobile!),
-    ]);
-
-    if (!desktopImage) {
-      return {
-        screenshots: { desktop: null, mobile: null, fullPage: null },
-        summary: "",
-        score: 0,
-        dimensions: [],
-        checks: [],
-        pins: [],
-        recommendations: [],
-        note: "A screenshot of this page could not be captured during this analysis, so no visual review was produced.",
-      };
-    }
+    const desktopImage = screenshots.desktop;
+    const mobileImage = screenshots.mobile;
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) {
