@@ -14,9 +14,9 @@ export const MOBILE_WIDTH = 390;
 
 export function screenshotUrls(url: string): VisualScreenshots {
   return {
-    desktop: `${ENDPOINT}/width/${DESKTOP_WIDTH}/crop/900/${url}`,
-    mobile: `${ENDPOINT}/viewportWidth/${MOBILE_WIDTH}/width/${MOBILE_WIDTH}/crop/844/${url}`,
+    desktop: `${ENDPOINT}/wait/8/width/${DESKTOP_WIDTH}/crop/900/${url}`,
+    mobile: `${ENDPOINT}/wait/8/viewportWidth/${MOBILE_WIDTH}/width/${MOBILE_WIDTH}/crop/844/${url}`,
     // No crop means the renderer captures the page in full.
-    fullPage: `${ENDPOINT}/width/${DESKTOP_WIDTH}/${url}`,
+    fullPage: `${ENDPOINT}/wait/8/width/${DESKTOP_WIDTH}/${url}`,
   };
 }
