@@ -2,6 +2,7 @@ import {
   Briefcase,
   Compass,
   Download,
+  Eye,
   Gauge,
   Info,
   LayoutGrid,
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
   monitor: Monitor,
+  eye: Eye,
   compass: Compass,
   gauge: Gauge,
   "sliders-horizontal": SlidersHorizontal,
