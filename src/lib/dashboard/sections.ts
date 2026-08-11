@@ -4,6 +4,7 @@ export const DASHBOARD_SECTIONS = [
   { id: "visual", label: "Visual Intelligence", short: "Visual", icon: "eye" },
   { id: "confidence", label: "AI Confidence", short: "Confidence", icon: "shield-check" },
   { id: "understanding", label: "Website Understanding", short: "Understanding", icon: "compass" },
+  { id: "agents", label: "Multi-Agent Intelligence", short: "Agents", icon: "users" },
   { id: "score", label: "Overall Score", short: "Score", icon: "gauge" },
   { id: "breakdown", label: "Score Breakdown", short: "Breakdown", icon: "sliders-horizontal" },
   { id: "summary", label: "Quick Summary", short: "Summary", icon: "layout-grid" },
