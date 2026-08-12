@@ -5,6 +5,7 @@ import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-stat
 import { DashboardErrorState } from "@/components/dashboard/dashboard-error-state";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { AiConfidenceCard } from "@/components/dashboard/ai-confidence-card";
+import { AiWebsiteUnderstandingSection } from "@/components/dashboard/ai-website-understanding";
 import { EvidenceSummary } from "@/components/dashboard/evidence-summary";
 import { OverallScore } from "@/components/dashboard/overall-score";
 import { ScoreBreakdown } from "@/components/dashboard/score-breakdown";
@@ -151,8 +152,17 @@ function DashboardContent({
       </DashboardSection>
 
       <DashboardSection
-        id="visual"
+        id="ai-understanding"
         eyebrow="Section 02"
+        title="AI Website Understanding"
+        description="What this site is, who it serves and what it wants visitors to do — before anything is scored."
+      >
+        <AiWebsiteUnderstandingSection understanding={aiUnderstanding} />
+      </DashboardSection>
+
+      <DashboardSection
+        id="visual"
+        eyebrow="Section 03"
         title="Visual Intelligence"
         description="How the page actually looks on screen, read from real desktop and mobile screenshots."
       >
@@ -163,7 +173,7 @@ function DashboardContent({
 
       <DashboardSection
         id="confidence"
-        eyebrow="Section 03"
+        eyebrow="Section 04"
         title="AI Confidence"
         description="How much of this page we were able to read, and how sure the findings are."
       >
@@ -172,7 +182,7 @@ function DashboardContent({
 
       <DashboardSection
         id="understanding"
-        eyebrow="Section 04"
+        eyebrow="Section 05"
         title="Website Understanding"
         description="What WebLens read on the page, before scoring anything."
       >
@@ -184,7 +194,7 @@ function DashboardContent({
 
       <DashboardSection
         id="agents"
-        eyebrow="Section 05"
+        eyebrow="Section 06"
         title="Multi-Agent Intelligence"
         description="Six specialists review the same evidence, then reconcile it into one plan."
       >
@@ -195,7 +205,7 @@ function DashboardContent({
 
       <DashboardSection
         id="score"
-        eyebrow="Section 06"
+        eyebrow="Section 07"
         title="Overall Score"
         description="A single measure combining design, performance, SEO, accessibility and business signals."
       >
@@ -204,7 +214,7 @@ function DashboardContent({
 
       <DashboardSection
         id="breakdown"
-        eyebrow="Section 07"
+        eyebrow="Section 08"
         title="Score Breakdown"
         description="Exactly how the overall number is made up, area by area."
       >
@@ -213,7 +223,7 @@ function DashboardContent({
 
       <DashboardSection
         id="summary"
-        eyebrow="Section 08"
+        eyebrow="Section 09"
         title="Quick Summary"
         description="Where the site stands in each core area."
       >
@@ -222,7 +232,7 @@ function DashboardContent({
 
       <DashboardSection
         id="details"
-        eyebrow="Section 09"
+        eyebrow="Section 10"
         title="Detailed Analysis"
         description="Open any area to see what is working, what isn't, and what to do next."
       >
@@ -233,7 +243,7 @@ function DashboardContent({
 
       <DashboardSection
         id="business"
-        eyebrow="Section 10"
+        eyebrow="Section 11"
         title="Business Review"
         description="How the site performs as a business asset, not just as a webpage."
       >
@@ -244,7 +254,7 @@ function DashboardContent({
 
       <DashboardSection
         id="intelligence"
-        eyebrow="Section 11"
+        eyebrow="Section 12"
         title="WebLens Intelligence"
         description="Consultant-style guidance: what to change, why it matters, and what it takes."
       >
@@ -255,7 +265,7 @@ function DashboardContent({
 
       <DashboardSection
         id="recommendations"
-        eyebrow="Section 12"
+        eyebrow="Section 13"
         title="Recommendations"
         description="Every action from this analysis, grouped by priority."
       >
@@ -266,7 +276,7 @@ function DashboardContent({
 
       <DashboardSection
         id="evidence"
-        eyebrow="Section 13"
+        eyebrow="Section 14"
         title="Evidence Used"
         description="Every source checked for this analysis, including the ones we could not reach."
       >
@@ -275,7 +285,7 @@ function DashboardContent({
 
       <DashboardSection
         id="methodology"
-        eyebrow="Section 14"
+        eyebrow="Section 15"
         title="How This Report Was Generated"
         description="The steps behind these findings, and what sits outside their reach."
       >
@@ -284,11 +294,12 @@ function DashboardContent({
         </Suspense>
       </DashboardSection>
 
-      <DashboardSection id="export" eyebrow="Section 15" title="Export">
+      <DashboardSection id="export" eyebrow="Section 16" title="Export">
         <Suspense fallback={<SectionFallback />}>
           <ExportArea report={report} />
         </Suspense>
       </DashboardSection>
+
     </>
   );
 }
