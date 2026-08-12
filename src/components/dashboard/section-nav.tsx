@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Target,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +33,7 @@ const ICONS: Record<string, LucideIcon> = {
   "list-checks": ListChecks,
   briefcase: Briefcase,
   sparkles: Sparkles,
+  target: Target,
   lightbulb: Lightbulb,
   download: Download,
   "shield-check": ShieldCheck,

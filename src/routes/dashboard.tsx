@@ -19,6 +19,7 @@ import { useDashboardReport } from "@/hooks/use-dashboard-report";
 import { buildAiUnderstanding } from "@/lib/analysis/ai-understanding";
 import { shareReport } from "@/lib/dashboard/export";
 import { buildAgentPanel } from "@/lib/intelligence/agents";
+import { buildPriorityRecommendations } from "@/lib/dashboard/priority-recommendations";
 
 /** Lower sections load on demand so the first screen stays light. */
 const DetailedAnalysis = lazy(() =>
@@ -44,6 +45,11 @@ const AgentPanelSection = lazy(() =>
 const RecommendationsSection = lazy(() =>
   import("@/components/dashboard/recommendations-section").then((module) => ({
     default: module.RecommendationsSection,
+  })),
+);
+const PriorityRecommendationsSection = lazy(() =>
+  import("@/components/dashboard/priority-recommendations-section").then((module) => ({
+    default: module.PriorityRecommendationsSection,
   })),
 );
 const MethodologySection = lazy(() =>
@@ -122,6 +128,7 @@ function DashboardContent({
 }) {
   const { report, intelligence, reload } = state;
   const agentPanel = useMemo(() => buildAgentPanel(report), [report]);
+  const priorities = useMemo(() => buildPriorityRecommendations(report), [report]);
   const aiUnderstanding = useMemo(
     () => buildAiUnderstanding(report.understanding, report.evidence, report.siteName),
     [report],
@@ -269,8 +276,19 @@ function DashboardContent({
       </DashboardSection>
 
       <DashboardSection
-        id="recommendations"
+        id="priority"
         eyebrow="Section 13"
+        title="Priority Recommendations"
+        description="The three to five actions with the strongest business impact for the effort involved."
+      >
+        <Suspense fallback={<SectionFallback />}>
+          <PriorityRecommendationsSection view={priorities} />
+        </Suspense>
+      </DashboardSection>
+
+      <DashboardSection
+        id="recommendations"
+        eyebrow="Section 14"
         title="Recommendations"
         description="Every action from this analysis, grouped by priority."
       >
@@ -281,7 +299,7 @@ function DashboardContent({
 
       <DashboardSection
         id="evidence"
-        eyebrow="Section 14"
+        eyebrow="Section 15"
         title="Evidence Used"
         description="Every source checked for this analysis, including the ones we could not reach."
       >
@@ -290,7 +308,7 @@ function DashboardContent({
 
       <DashboardSection
         id="methodology"
-        eyebrow="Section 15"
+        eyebrow="Section 16"
         title="How This Report Was Generated"
         description="The steps behind these findings, and what sits outside their reach."
       >
@@ -299,7 +317,7 @@ function DashboardContent({
         </Suspense>
       </DashboardSection>
 
-      <DashboardSection id="export" eyebrow="Section 16" title="Export">
+      <DashboardSection id="export" eyebrow="Section 17" title="Export">
         <Suspense fallback={<SectionFallback />}>
           <ExportArea report={report} />
         </Suspense>

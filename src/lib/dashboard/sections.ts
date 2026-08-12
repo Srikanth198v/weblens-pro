@@ -12,6 +12,7 @@ export const DASHBOARD_SECTIONS = [
   { id: "details", label: "Detailed Analysis", short: "Details", icon: "list-checks" },
   { id: "business", label: "Business Review", short: "Business", icon: "briefcase" },
   { id: "intelligence", label: "WebLens Intelligence", short: "Intelligence", icon: "sparkles" },
+  { id: "priority", label: "Priority Recommendations", short: "Priorities", icon: "target" },
   { id: "recommendations", label: "Recommendations", short: "Actions", icon: "lightbulb" },
   { id: "evidence", label: "Evidence Used", short: "Evidence", icon: "list-checks" },
   { id: "methodology", label: "How This Report Was Generated", short: "Method", icon: "info" },
