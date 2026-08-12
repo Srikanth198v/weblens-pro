@@ -16,6 +16,7 @@ import { WebsiteUnderstandingSection } from "@/components/dashboard/website-unde
 import { SiteNav } from "@/components/layout/site-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardReport } from "@/hooks/use-dashboard-report";
+import { buildAiUnderstanding } from "@/lib/analysis/ai-understanding";
 import { shareReport } from "@/lib/dashboard/export";
 import { buildAgentPanel } from "@/lib/intelligence/agents";
 
@@ -121,6 +122,10 @@ function DashboardContent({
 }) {
   const { report, intelligence, reload } = state;
   const agentPanel = useMemo(() => buildAgentPanel(report), [report]);
+  const aiUnderstanding = useMemo(
+    () => buildAiUnderstanding(report.understanding, report.evidence, report.siteName),
+    [report],
+  );
 
   return (
     <>
