@@ -1,4 +1,5 @@
 import {
+  Brain,
   Briefcase,
   Compass,
   Download,
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
   monitor: Monitor,
+  brain: Brain,
   eye: Eye,
   compass: Compass,
   gauge: Gauge,

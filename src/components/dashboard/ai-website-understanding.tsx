@@ -1,0 +1,102 @@
+import { Brain, Sparkles } from "lucide-react";
+
+import { Reveal } from "@/components/motion/reveal";
+import type { AiWebsiteUnderstanding } from "@/lib/analysis/ai-understanding";
+
+/**
+ * AI Website Understanding — what the page says it is, before anything is scored.
+ * Every value is derived from collected evidence; unknowns are stated as unknown.
+ */
+export function AiWebsiteUnderstandingSection({
+  understanding,
+}: {
+  understanding: AiWebsiteUnderstanding | null;
+}) {
+  if (!understanding) {
+    return (
+      <div className="rounded-3xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-soft">
+        This analysis was saved before WebLens started reading pages in detail. Re-run it to see
+        what the site says about itself.
+      </div>
+    );
+  }
+
+  const { fields, summary, confidence, partial } = understanding;
+
+  return (
+    <Reveal>
+      <div className="rounded-3xl border border-border bg-card p-6 shadow-card sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+              <Brain aria-hidden="true" className="size-5" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Read from the page itself</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Metadata, headings, links, buttons and visible copy — no assumptions added.
+              </p>
+            </div>
+          </div>
+
+          <div className="min-w-[10rem]">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                Confidence
+              </span>
+              <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-accent-foreground tabular-nums">
+                {confidence}%
+              </span>
+            </div>
+            <div
+              className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface"
+              role="progressbar"
+              aria-valuenow={confidence}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Understanding confidence"
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-[width] duration-700 ease-in-out"
+                style={{ width: `${confidence}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {partial ? (
+          <p className="mt-5 rounded-2xl bg-surface px-4 py-3 text-sm text-foreground/80">
+            We could only partially understand this website from the available content.
+          </p>
+        ) : null}
+
+        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+          {fields.map((field) => (
+            <div key={field.id} className="rounded-2xl bg-surface p-4">
+              <dt className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                {field.label}
+              </dt>
+              <dd
+                className={
+                  field.unknown
+                    ? "mt-1.5 text-sm leading-relaxed text-muted-foreground"
+                    : "mt-1.5 text-sm leading-relaxed text-foreground/85"
+                }
+              >
+                {field.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="mt-6 rounded-2xl border border-border p-5">
+          <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            <Sparkles aria-hidden="true" className="size-3.5 text-primary" />
+            AI Summary
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-foreground/85">{summary}</p>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
