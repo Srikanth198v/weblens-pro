@@ -52,6 +52,8 @@ export type PriorityRecommendationsView = {
   emptyReason: string | null;
   /** The kind of website these priorities were tuned for. */
   classification: SiteClassification;
+  /** How the ranking was tuned for that kind of website. */
+  focus: string;
 };
 
 
@@ -290,6 +292,7 @@ export function buildPriorityRecommendations(
         ? "No blocking issues were detected during this analysis, so there is nothing to prioritise right now."
         : "This analysis was saved before evidence collection, so priorities could not be derived. Re-running the analysis would rebuild them.",
       classification,
+      focus: DEFAULT_RULE.focus,
     };
   }
 
