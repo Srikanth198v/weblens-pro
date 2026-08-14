@@ -8,6 +8,7 @@
  * frames them the way a senior consultant would: hedged, specific, actionable.
  */
 
+import { classifySite, type SiteCategoryId, type SiteClassification } from "@/lib/analysis/site-category";
 import type {
   CategoryId,
   DashboardReport,
@@ -32,6 +33,8 @@ export type PriorityRecommendation = {
   estimatedGain: number;
   /** Business impact per unit of effort — drives the ranking. */
   impactScore: number;
+  /** Why this ranked where it did for this kind of website. */
+  contextNote: string | null;
 };
 
 export type ExpectedImpact = {
@@ -47,7 +50,10 @@ export type PriorityRecommendationsView = {
   expectedImpact: ExpectedImpact[];
   /** Shown when nothing measurable came back. */
   emptyReason: string | null;
+  /** The kind of website these priorities were tuned for. */
+  classification: SiteClassification;
 };
+
 
 const EFFORT_FROM_DIFFICULTY: Record<RecommendationDifficulty, PriorityEffort> = {
   Easy: "Easy",
