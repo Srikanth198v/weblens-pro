@@ -16,6 +16,7 @@ import { WebsiteUnderstandingSection } from "@/components/dashboard/website-unde
 import { SiteNav } from "@/components/layout/site-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardReport } from "@/hooks/use-dashboard-report";
+import { useGptSummary } from "@/hooks/use-gpt-summary";
 import { buildAiUnderstanding } from "@/lib/analysis/ai-understanding";
 import { shareReport } from "@/lib/dashboard/export";
 import { buildAgentPanel } from "@/lib/intelligence/agents";
@@ -133,6 +134,8 @@ function DashboardContent({
     () => buildAiUnderstanding(report.understanding, report.evidence, report.siteName),
     [report],
   );
+  const gptSummary = useGptSummary(report);
+
 
   return (
     <>
@@ -169,7 +172,7 @@ function DashboardContent({
         title="AI Website Understanding"
         description="What this site is, who it serves and what it wants visitors to do — before anything is scored."
       >
-        <AiWebsiteUnderstandingSection understanding={aiUnderstanding} />
+        <AiWebsiteUnderstandingSection understanding={aiUnderstanding} gpt={gptSummary} />
       </DashboardSection>
 
       <DashboardSection
