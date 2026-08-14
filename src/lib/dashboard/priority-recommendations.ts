@@ -93,11 +93,162 @@ const EXPECTED_IMPACT: Record<CategoryId, ExpectedImpact> = {
   },
 };
 
-function toPriorityItem(item: Recommendation): PriorityRecommendation {
+/**
+ * Topics let us tune advice to the kind of website that was detected without
+ * ever inventing a finding — a topic only matches text that came from a
+ * measured recommendation.
+ */
+type Topic =
+  | "testimonials"
+  | "pricing"
+  | "cta"
+  | "contact"
+  | "navigation"
+  | "media"
+  | "title-length"
+  | "readability"
+  | "mobile"
+  | "search"
+  | "forms"
+  | "other";
+
+const TOPIC_PATTERNS: Array<{ topic: Topic; pattern: RegExp }> = [
+  { topic: "testimonials", pattern: /testimonial|review|social proof|customer proof/i },
+  { topic: "pricing", pattern: /pricing|price|plans?\b/i },
+  { topic: "cta", pattern: /call to action|cta|conversion|sign[- ]?up|primary action/i },
+  { topic: "contact", pattern: /contact|phone|address|enquir|inquir/i },
+  { topic: "navigation", pattern: /navigation|internal link|menu|structure of the page|sitemap/i },
+  { topic: "media", pattern: /image|media|lazy|dimension|format|screenshot|video/i },
+  { topic: "title-length", pattern: /title (tag|length)|meta title|shorten the title|description length/i },
+  { topic: "readability", pattern: /heading|readab|content length|word count|copy/i },
+  { topic: "mobile", pattern: /mobile|viewport|small screen|touch/i },
+  { topic: "search", pattern: /search|discover|find (products|content)/i },
+  { topic: "forms", pattern: /form|input|label|field/i },
+];
+
+function topicOf(item: Recommendation): Topic {
+  const text = `${item.title} ${item.description}`;
+  return TOPIC_PATTERNS.find((entry) => entry.pattern.test(text))?.topic ?? "other";
+}
+
+type ContextRule = {
+  /** Areas that matter most for this kind of website. */
+  boostCategories: CategoryId[];
+  boostTopics: Topic[];
+  /** Advice that is usually noise for this kind of website. */
+  dampTopics: Topic[];
+  /** Advice that does not apply to this kind of website at all. */
+  dropTopics: Topic[];
+  focus: string;
+};
+
+const DEFAULT_RULE: ContextRule = {
+  boostCategories: [],
+  boostTopics: [],
+  dampTopics: [],
+  dropTopics: [],
+  focus: "Priorities are balanced across every area measured during this analysis.",
+};
+
+const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
+  enterprise: {
+    boostCategories: ["performance", "accessibility"],
+    boostTopics: ["navigation", "media"],
+    dampTopics: ["title-length"],
+    dropTopics: ["testimonials", "pricing"],
+    focus: "Weighted towards performance, accessibility, navigation and media delivery.",
+  },
+  saas: {
+    boostCategories: ["business", "design"],
+    boostTopics: ["cta", "pricing", "testimonials"],
+    dampTopics: ["contact"],
+    dropTopics: [],
+    focus: "Weighted towards onboarding, value proposition, CTA hierarchy, pricing clarity and social proof.",
+  },
+  ecommerce: {
+    boostCategories: ["performance", "business"],
+    boostTopics: ["search", "media", "mobile", "cta"],
+    dampTopics: ["readability"],
+    dropTopics: [],
+    focus: "Weighted towards product discovery, search, trust signals, checkout flow and mobile conversion.",
+  },
+  local: {
+    boostCategories: ["business"],
+    boostTopics: ["contact", "testimonials", "pricing", "mobile"],
+    dampTopics: [],
+    dropTopics: [],
+    focus: "Weighted towards contact details, hours, location, pricing transparency and trust signals.",
+  },
+  content: {
+    boostCategories: ["seo", "performance"],
+    boostTopics: ["readability", "navigation", "search"],
+    dampTopics: ["pricing", "testimonials"],
+    dropTopics: [],
+    focus: "Weighted towards readability, article structure, internal linking, search and page speed.",
+  },
+  utility: {
+    boostCategories: ["accessibility", "performance", "design"],
+    boostTopics: ["forms", "cta", "mobile"],
+    dampTopics: ["testimonials", "pricing"],
+    dropTopics: [],
+    focus: "Weighted towards task completion, clarity of actions, mobile usability, performance and accessibility.",
+  },
+  marketplace: {
+    boostCategories: ["business", "performance"],
+    boostTopics: ["search", "navigation", "mobile"],
+    dampTopics: [],
+    dropTopics: [],
+    focus: "Weighted towards listing discovery, search, trust signals and mobile flow.",
+  },
+  community: {
+    boostCategories: ["performance", "accessibility"],
+    boostTopics: ["navigation", "readability", "search"],
+    dampTopics: ["pricing"],
+    dropTopics: [],
+    focus: "Weighted towards navigation, readability, search and page speed.",
+  },
+  nonprofit: {
+    boostCategories: ["accessibility", "business"],
+    boostTopics: ["cta", "contact", "readability"],
+    dampTopics: ["pricing"],
+    dropTopics: [],
+    focus: "Weighted towards clarity of the main action, accessibility and trust signals.",
+  },
+  portfolio: {
+    boostCategories: ["design", "performance"],
+    boostTopics: ["media", "contact", "cta"],
+    dampTopics: ["pricing"],
+    dropTopics: [],
+    focus: "Weighted towards presentation, media delivery and how easily someone can get in touch.",
+  },
+};
+
+function toPriorityItem(
+  item: Recommendation,
+  rule: ContextRule,
+  classification: SiteClassification,
+): PriorityRecommendation {
   const effort = EFFORT_FROM_DIFFICULTY[item.difficulty];
-  const impactScore =
+  const topic = topicOf(item);
+
+  const base =
     ((item.estimatedGain + 1) * PRIORITY_WEIGHT[item.priority] * IMPACT_WEIGHT[item.impact]) /
     EFFORT_COST[effort];
+
+  // Conservative mode: category signals were weak, so tuning stays gentle.
+  const strength = classification.conservative ? 0.4 : 1;
+
+  let multiplier = 1;
+  let contextNote: string | null = null;
+
+  if (rule.boostCategories.includes(item.category) || rule.boostTopics.includes(topic)) {
+    multiplier += 0.45 * strength;
+    contextNote = `Raised for a ${classification.label.toLowerCase()} site, based on the signals observed during this analysis.`;
+  }
+  if (rule.dampTopics.includes(topic)) {
+    multiplier -= 0.35 * strength;
+    contextNote = `Kept lower for a ${classification.label.toLowerCase()} site — other observed issues appear to matter more here.`;
+  }
 
   return {
     id: item.id,
@@ -110,15 +261,24 @@ function toPriorityItem(item: Recommendation): PriorityRecommendation {
     estimatedTime: item.estimatedTime,
     suggestedFix: item.howToFix,
     estimatedGain: item.estimatedGain,
-    impactScore: Math.round(impactScore * 10) / 10,
+    impactScore: Math.round(base * multiplier * 10) / 10,
+    contextNote,
   };
 }
 
 export function buildPriorityRecommendations(
   report: DashboardReport,
+  classificationInput?: SiteClassification,
 ): PriorityRecommendationsView {
-  const ranked = report.recommendations
-    .map(toPriorityItem)
+  const classification = classificationInput ?? classifySite(report.evidence);
+  const rule = (!classification.conservative && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
+
+  const source = classification.conservative
+    ? report.recommendations
+    : report.recommendations.filter((item) => !rule.dropTopics.includes(topicOf(item)));
+
+  const ranked = source
+    .map((item) => toPriorityItem(item, rule, classification))
     .sort((a, b) => b.impactScore - a.impactScore);
 
   if (!ranked.length) {
@@ -129,6 +289,7 @@ export function buildPriorityRecommendations(
       emptyReason: report.evidence
         ? "No blocking issues were detected during this analysis, so there is nothing to prioritise right now."
         : "This analysis was saved before evidence collection, so priorities could not be derived. Re-running the analysis would rebuild them.",
+      classification,
     };
   }
 
@@ -146,5 +307,6 @@ export function buildPriorityRecommendations(
   const categories = Array.from(new Set(items.map((item) => item.category)));
   const expectedImpact = categories.map((category) => EXPECTED_IMPACT[category]);
 
-  return { items, doThisFirst, expectedImpact, emptyReason: null };
+  return { items, doThisFirst, expectedImpact, emptyReason: null, classification, focus: rule.focus };
 }
+
