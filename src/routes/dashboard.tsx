@@ -133,6 +133,8 @@ function DashboardContent({
     () => buildAiUnderstanding(report.understanding, report.evidence, report.siteName),
     [report],
   );
+  const gptSummary = useGptSummary(report);
+
 
   return (
     <>
