@@ -1,16 +1,22 @@
 import { Brain, Sparkles } from "lucide-react";
 
 import { Reveal } from "@/components/motion/reveal";
+import type { GptSummary } from "@/lib/analysis/ai-summary.functions";
 import type { AiWebsiteUnderstanding } from "@/lib/analysis/ai-understanding";
+
+type GptState = { status: "loading" | "fallback" } | { status: "ready"; summary: GptSummary };
 
 /**
  * AI Website Understanding — what the page says it is, before anything is scored.
- * Every value is derived from collected evidence; unknowns are stated as unknown.
+ * The written reading comes from the model when available, otherwise from the
+ * local rule-based reading. Every value still traces back to collected evidence.
  */
 export function AiWebsiteUnderstandingSection({
   understanding,
+  gpt,
 }: {
   understanding: AiWebsiteUnderstanding | null;
+  gpt?: GptState;
 }) {
   if (!understanding) {
     return (
@@ -21,7 +27,22 @@ export function AiWebsiteUnderstandingSection({
     );
   }
 
-  const { fields, summary, confidence, partial } = understanding;
+  const model = gpt?.status === "ready" ? gpt.summary : null;
+
+  const summary = model?.summary || understanding.summary;
+  const confidence = model ? model.confidence : understanding.confidence;
+  const partial = confidence < 70;
+
+  const fields = understanding.fields.map((field) => {
+    if (field.id === "value" && model?.valueProposition) {
+      return { ...field, value: model.valueProposition, unknown: false };
+    }
+    if (field.id === "tone" && model?.brandTone) {
+      return { ...field, value: model.brandTone, unknown: false };
+    }
+    return field;
+  });
+
 
   return (
     <Reveal>
