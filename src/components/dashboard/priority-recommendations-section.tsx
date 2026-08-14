@@ -1,6 +1,7 @@
 import {
   Accessibility,
   Briefcase,
+  Building2,
   Gauge,
   LayoutDashboard,
   Search,
