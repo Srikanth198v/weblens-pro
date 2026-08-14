@@ -255,8 +255,14 @@ function PriorityCard({ item, rank }: { item: PriorityRecommendation; rank: numb
         </Block>
         <Block label="Why it matters">
           <p className="text-sm leading-relaxed text-foreground/85">{item.whyItMatters}</p>
+          {item.contextNote ? (
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              {item.contextNote}
+            </p>
+          ) : null}
         </Block>
       </div>
+
 
       <div className="mt-3 pl-2">
         <Block label="Suggested fix">
