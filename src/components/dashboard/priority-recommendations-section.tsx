@@ -1,6 +1,7 @@
 import {
   Accessibility,
   Briefcase,
+  Building2,
   Gauge,
   LayoutDashboard,
   Search,
@@ -74,14 +75,21 @@ const IMPACT_ICON: Record<ExpectedImpact["icon"], LucideIcon> = {
 export function PriorityRecommendationsSection({ view }: { view: PriorityRecommendationsView }) {
   if (!view.items.length) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-        <p className="text-sm leading-relaxed text-muted-foreground">{view.emptyReason}</p>
+      <div className="space-y-6">
+        <DetectedCategoryCard view={view} />
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+          <p className="text-sm leading-relaxed text-muted-foreground">{view.emptyReason}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <Reveal>
+        <DetectedCategoryCard view={view} />
+      </Reveal>
+
       {view.doThisFirst ? (
         <Reveal>
           <DoThisFirstCard item={view.doThisFirst} />
@@ -104,6 +112,61 @@ export function PriorityRecommendationsSection({ view }: { view: PriorityRecomme
     </div>
   );
 }
+
+/** Shows what kind of website was detected, how sure we are, and from which signals. */
+function DetectedCategoryCard({ view }: { view: PriorityRecommendationsView }) {
+  const { classification, focus } = view;
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground/70">
+          <Building2 aria-hidden="true" className="size-4.5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+            Detected category
+          </p>
+          <h3 className="text-base font-bold text-foreground sm:text-lg">{classification.label}</h3>
+        </div>
+        <Badge className="ml-auto border-primary/30 bg-primary-soft text-accent-foreground">
+          Confidence {classification.confidence}%
+        </Badge>
+      </div>
+
+      <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+        <div
+          className="h-full rounded-full bg-primary transition-[width] duration-500"
+          style={{ width: `${classification.confidence}%` }}
+        />
+      </div>
+
+      {classification.signals.length ? (
+        <div className="mt-4">
+          <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+            Signals observed during this analysis
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {classification.signals.map((signal) => (
+              <li
+                key={signal}
+                className="rounded-full border border-border bg-secondary px-3 py-1 text-xs text-foreground/80"
+              >
+                {signal}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+        {classification.note ? `${classification.note} ` : ""}
+        {focus}
+      </p>
+    </div>
+  );
+}
+
 
 function DoThisFirstCard({ item }: { item: PriorityRecommendation }) {
   const Icon = CATEGORY_ICON[item.category];
@@ -192,8 +255,14 @@ function PriorityCard({ item, rank }: { item: PriorityRecommendation; rank: numb
         </Block>
         <Block label="Why it matters">
           <p className="text-sm leading-relaxed text-foreground/85">{item.whyItMatters}</p>
+          {item.contextNote ? (
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              {item.contextNote}
+            </p>
+          ) : null}
         </Block>
       </div>
+
 
       <div className="mt-3 pl-2">
         <Block label="Suggested fix">
