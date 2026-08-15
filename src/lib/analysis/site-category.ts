@@ -392,8 +392,26 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
   }
 
   const ranked = [...totals.entries()].sort((a, b) => b[1].score - a[1].score);
-  const top = ranked[0];
-  const runnerUp = ranked[1];
+
+  // A site can be commercial AND a global brand. When several independent
+  // corporate-scale signals are observed, enterprise represents the primary
+  // context even if retail vocabulary scores slightly higher.
+  const enterprise = totals.get("enterprise");
+  const leader = ranked[0];
+  const enterprisePrimary =
+    !!enterprise &&
+    !!leader &&
+    leader[0] !== "enterprise" &&
+    enterprise.signals.length >= 4 &&
+    enterprise.score >= 8 &&
+    enterprise.score >= leader[1].score * 0.6;
+
+  const order = enterprisePrimary
+    ? ([["enterprise", enterprise!] as const, ...ranked.filter(([id]) => id !== "enterprise")] as typeof ranked)
+    : ranked;
+
+  const top = order[0];
+  const runnerUp = order[1];
 
   if (!top || top[1].score < 3) {
     return {
@@ -406,7 +424,7 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
     };
   }
 
-  const totalScore = ranked.reduce((sum, [, entry]) => sum + entry.score, 0);
+  const totalScore = order.reduce((sum, [, entry]) => sum + entry.score, 0);
   const share = top[1].score / Math.max(totalScore, 1);
   const margin = (top[1].score - (runnerUp?.[1].score ?? 0)) / Math.max(top[1].score, 1);
   const depth = Math.min(top[1].score / 9, 1);
@@ -416,14 +434,20 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
     Math.min(97, Math.round((share * 45 + margin * 25 + depth * 30) * 100) / 100),
   );
 
-  const conservative = confidence < 70;
+  const conservative = confidence < 70 && !enterprisePrimary;
+
+  const secondary = enterprisePrimary && runnerUp ? SITE_CATEGORY_LABEL[runnerUp[0]] : null;
 
   return {
     category: top[0],
     label: SITE_CATEGORY_LABEL[top[0]],
-    confidence: Math.round(confidence),
+    confidence: Math.round(enterprisePrimary ? Math.max(confidence, 60) : confidence),
     signals: top[1].signals.slice(0, 6),
     conservative,
-    note: conservative ? "Website category could not be determined with high confidence." : null,
+    note: conservative
+      ? "Website category could not be determined with high confidence."
+      : secondary
+        ? `Also shows ${secondary.toLowerCase()} characteristics; enterprise context takes priority.`
+        : null,
   };
 }
