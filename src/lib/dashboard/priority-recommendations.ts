@@ -112,10 +112,14 @@ type Topic =
   | "mobile"
   | "search"
   | "forms"
+  | "schema"
+  | "i18n"
   | "other";
 
 const TOPIC_PATTERNS: Array<{ topic: Topic; pattern: RegExp }> = [
-  { topic: "testimonials", pattern: /testimonial|review|social proof|customer proof/i },
+  { topic: "testimonials", pattern: /testimonial|review|social proof|customer proof|case stud/i },
+  { topic: "schema", pattern: /structured data|schema|json-?ld|rich result|microdata/i },
+  { topic: "i18n", pattern: /language|hreflang|localis|localiz|internationalis|internationaliz|region|locale/i },
   { topic: "pricing", pattern: /pricing|price|plans?\b/i },
   { topic: "cta", pattern: /call to action|cta|conversion|sign[- ]?up|primary action/i },
   { topic: "contact", pattern: /contact|phone|address|enquir|inquir/i },
@@ -127,6 +131,7 @@ const TOPIC_PATTERNS: Array<{ topic: Topic; pattern: RegExp }> = [
   { topic: "search", pattern: /search|discover|find (products|content)/i },
   { topic: "forms", pattern: /form|input|label|field/i },
 ];
+
 
 function topicOf(item: Recommendation): Topic {
   const text = `${item.title} ${item.description}`;
