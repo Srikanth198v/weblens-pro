@@ -223,8 +223,9 @@ const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
     boostCategories: ["performance", "accessibility", "seo"],
     boostTopics: ["navigation", "media", "schema", "i18n", "mobile"],
     dampTopics: [],
-    dropTopics: ["testimonials", "pricing", "title-length"],
-    gatedTopics: ["contact"],
+    dropTopics: ["title-length"],
+    gatedTopics: ["contact", "testimonials", "pricing"],
+
     focus:
       "Weighted towards performance, accessibility, structured data, media delivery, navigation clarity and internationalisation.",
   },
