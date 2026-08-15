@@ -303,6 +303,7 @@ function toPriorityItem(
   rule: ContextRule,
   classification: SiteClassification,
   strength: number,
+  relevanceNote: string,
 ): PriorityRecommendation {
   const effort = EFFORT_FROM_DIFFICULTY[item.difficulty];
   const topic = topicOf(item);
@@ -338,6 +339,7 @@ function toPriorityItem(
     estimatedGain: item.estimatedGain,
     impactScore: Math.round(base * multiplier * 10) / 10,
     contextNote,
+    relevanceNote,
   };
 }
 
@@ -356,13 +358,24 @@ export function buildPriorityRecommendations(
   const rule = (tuned && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
   const strength = tuned ? 1 : 0.4;
 
-  const source = tuned
-    ? report.recommendations.filter((item) => !rule.dropTopics.includes(topicOf(item)))
-    : report.recommendations;
+  const ranked = (tuned ? report.recommendations : report.recommendations)
+    .flatMap((item) => {
+      const topic = topicOf(item);
+      if (tuned && rule.dropTopics.includes(topic)) return [];
 
-  const ranked = source
-    .map((item) => toPriorityItem(item, rule, classification, strength))
+      const relevance = tuned
+        ? assessRelevance(topic, rule, classification, report.evidence)
+        : {
+            relevant: true,
+            reason:
+              "Website category could not be determined with high confidence, so this is kept under a conservative mixed reading of the evidence.",
+          };
+      if (!relevance.relevant) return [];
+
+      return [toPriorityItem(item, rule, classification, strength, relevance.reason)];
+    })
     .sort((a, b) => b.impactScore - a.impactScore);
+
 
 
   if (!ranked.length) {
