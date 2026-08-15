@@ -187,16 +187,16 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
       describe: "teams, workspace or app language",
     },
 
-    // E-commerce
+    // E-commerce — needs transactional evidence, not just retail vocabulary
     {
       category: "ecommerce",
       weight: 3,
-      when: has(text, /\b(add to (cart|bag)|buy now|shop now|checkout|cart)\b/),
+      when: has(text, /\b(add to (cart|bag)|buy now|checkout|view (cart|bag)|my (cart|bag))\b/),
       describe: "cart or checkout actions",
     },
     {
       category: "ecommerce",
-      weight: 2,
+      weight: 1,
       when: has(text, /\b(shop|store|collections?|products?|sale|shipping|returns)\b/),
       describe: "shop, product and shipping language",
     },
@@ -208,8 +208,17 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
     },
     {
       category: "ecommerce",
+      weight: 1,
+      when: has(text, /\b(shipping|free (delivery|returns)|returns policy|order tracking|wishlist)\b/),
+      describe: "shipping, returns or order-tracking language",
+    },
+    {
+      category: "ecommerce",
       weight: 2,
-      when: evidence.images.total >= 20 && has(text, /\b(price|from ?[₹$€£]|[₹$€£]\s?\d)/),
+      when:
+        evidence.images.total >= 20 &&
+        has(text, /\b(price|from ?[₹$€£]|[₹$€£]\s?\d)/) &&
+        has(text, /\b(add to (cart|bag)|buy|checkout|shop)\b/),
       describe: `${evidence.images.total} product images with visible price labels`,
     },
 
