@@ -146,8 +146,67 @@ type ContextRule = {
   dampTopics: Topic[];
   /** Advice that does not apply to this kind of website at all. */
   dropTopics: Topic[];
+  /**
+   * Topics that are only shown when the page itself carries evidence that the
+   * site operates that way — never because something is simply missing.
+   */
+  gatedTopics?: Topic[];
   focus: string;
 };
+
+/** Signals that a site is genuinely selling something on this page. */
+function hasCommercialEvidence(evidence: SiteEvidence | null): boolean {
+  if (!evidence) return false;
+  return (
+    evidence.content.hasPricingSection ||
+    evidence.content.hasTestimonials ||
+    evidence.links.hasPricing ||
+    evidence.structuredData.types.some((type) => /product|offer|service|store/i.test(type))
+  );
+}
+
+/** Signals that direct contact is part of how this site converts. */
+function hasContactEvidence(evidence: SiteEvidence | null): boolean {
+  if (!evidence) return false;
+  return (
+    evidence.content.hasContactDetails ||
+    evidence.links.mailto > 0 ||
+    evidence.links.tel > 0
+  );
+}
+
+type Relevance = { relevant: boolean; reason: string };
+
+/**
+ * Decides whether an observed recommendation actually applies to this kind of
+ * website. Missing-by-default advice is suppressed instead of being forced in.
+ */
+function assessRelevance(
+  topic: Topic,
+  rule: ContextRule,
+  classification: SiteClassification,
+  evidence: SiteEvidence | null,
+): Relevance {
+  const label = classification.label.toLowerCase();
+
+  if (!rule.gatedTopics?.includes(topic)) {
+    return { relevant: true, reason: `Applies to a ${label} site based on the evidence collected here.` };
+  }
+
+  if (topic === "contact") {
+    return hasContactEvidence(evidence)
+      ? { relevant: true, reason: "Contact details were detected on the page, so this path is already part of how the site converts." }
+      : { relevant: false, reason: "" };
+  }
+
+  return hasCommercialEvidence(evidence)
+    ? {
+        relevant: true,
+        reason: `Commercial signals (pricing, offers or customer proof) were detected during this analysis, so this applies to a ${label} site.`,
+      }
+    : { relevant: false, reason: "" };
+}
+
 
 const DEFAULT_RULE: ContextRule = {
   boostCategories: [],
