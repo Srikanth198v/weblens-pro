@@ -220,13 +220,15 @@ const DEFAULT_RULE: ContextRule = {
 
 const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
   enterprise: {
-    boostCategories: ["performance", "accessibility"],
+    boostCategories: ["performance", "accessibility", "seo"],
     boostTopics: ["navigation", "media", "schema", "i18n", "mobile"],
     dampTopics: [],
     dropTopics: ["testimonials", "pricing", "title-length"],
+    gatedTopics: ["contact"],
     focus:
       "Weighted towards performance, accessibility, structured data, media delivery, navigation clarity and internationalisation.",
   },
+
 
   saas: {
     boostCategories: ["business", "design"],
