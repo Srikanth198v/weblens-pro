@@ -258,11 +258,13 @@ const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
   },
   utility: {
     boostCategories: ["accessibility", "performance", "design"],
-    boostTopics: ["forms", "cta", "mobile"],
-    dampTopics: ["testimonials", "pricing"],
+    boostTopics: ["forms", "cta", "mobile", "navigation", "search"],
+    dampTopics: [],
     dropTopics: [],
+    gatedTopics: ["testimonials", "pricing"],
     focus: "Weighted towards task completion, clarity of actions, mobile usability, performance and accessibility.",
   },
+
   marketplace: {
     boostCategories: ["business", "performance"],
     boostTopics: ["search", "navigation", "mobile"],
