@@ -129,6 +129,31 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
       when: schema.some((type) => /organization|corporation/.test(type)),
       describe: "organization structured data",
     },
+    {
+      category: "enterprise",
+      weight: 2,
+      when: has(text, /\b(products?|solutions?|services?|business|for (business|enterprise|teams))\b/) && nav >= 5,
+      describe: "multiple product or solution families in navigation",
+    },
+    {
+      category: "enterprise",
+      weight: 2,
+      when: has(text, /\b(region|country|language|global site|worldwide|choose your (country|region))\b/),
+      describe: "region or language selection signals",
+    },
+    {
+      category: "enterprise",
+      weight: 1,
+      when: evidence.links.social.length >= 3 && evidence.links.total >= 40,
+      describe: `${evidence.links.social.length} corporate social channels on a large link structure`,
+    },
+    {
+      category: "enterprise",
+      weight: 2,
+      when: has(text, /\b(privacy|legal|terms|cookie preferences|accessibility statement|compliance)\b/),
+      describe: "legal, privacy or compliance links",
+    },
+
 
     // SaaS / software
     {
