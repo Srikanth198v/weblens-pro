@@ -236,6 +236,7 @@ function toPriorityItem(
   item: Recommendation,
   rule: ContextRule,
   classification: SiteClassification,
+  strength: number,
 ): PriorityRecommendation {
   const effort = EFFORT_FROM_DIFFICULTY[item.difficulty];
   const topic = topicOf(item);
@@ -244,8 +245,7 @@ function toPriorityItem(
     ((item.estimatedGain + 1) * PRIORITY_WEIGHT[item.priority] * IMPACT_WEIGHT[item.impact]) /
     EFFORT_COST[effort];
 
-  // Conservative mode: category signals were weak, so tuning stays gentle.
-  const strength = classification.conservative ? 0.4 : 1;
+
 
   let multiplier = 1;
   let contextNote: string | null = null;
