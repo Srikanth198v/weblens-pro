@@ -252,7 +252,13 @@ function PriorityCard({ item, rank }: { item: PriorityRecommendation; rank: numb
               </li>
             ))}
           </ul>
+          {item.relevanceNote ? (
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {item.relevanceNote}
+            </p>
+          ) : null}
         </Block>
+
         <Block label="Why it matters">
           <p className="text-sm leading-relaxed text-foreground/85">{item.whyItMatters}</p>
           {item.contextNote ? (
