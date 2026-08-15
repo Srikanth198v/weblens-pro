@@ -8,7 +8,9 @@
  * frames them the way a senior consultant would: hedged, specific, actionable.
  */
 
+import type { SiteEvidence } from "@/lib/analysis/evidence";
 import { classifySite, type SiteCategoryId, type SiteClassification } from "@/lib/analysis/site-category";
+
 import type {
   CategoryId,
   DashboardReport,
