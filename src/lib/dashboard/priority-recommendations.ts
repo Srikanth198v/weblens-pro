@@ -280,15 +280,24 @@ export function buildPriorityRecommendations(
   classificationInput?: SiteClassification,
 ): PriorityRecommendationsView {
   const classification = classificationInput ?? classifySite(report.evidence);
-  const rule = (!classification.conservative && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
 
-  const source = classification.conservative
-    ? report.recommendations
-    : report.recommendations.filter((item) => !rule.dropTopics.includes(topicOf(item)));
+  // Enterprise rules apply from 50% confidence upwards; every other category
+  // waits for the usual 70% threshold before tuning kicks in.
+  const enterpriseTuned =
+    classification.category === "enterprise" && classification.confidence >= 50;
+  const tuned = enterpriseTuned || !classification.conservative;
+
+  const rule = (tuned && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
+  const strength = tuned ? 1 : 0.4;
+
+  const source = tuned
+    ? report.recommendations.filter((item) => !rule.dropTopics.includes(topicOf(item)))
+    : report.recommendations;
 
   const ranked = source
-    .map((item) => toPriorityItem(item, rule, classification))
+    .map((item) => toPriorityItem(item, rule, classification, strength))
     .sort((a, b) => b.impactScore - a.impactScore);
+
 
   if (!ranked.length) {
     return {
