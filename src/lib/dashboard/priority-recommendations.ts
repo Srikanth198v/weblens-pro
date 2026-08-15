@@ -8,7 +8,9 @@
  * frames them the way a senior consultant would: hedged, specific, actionable.
  */
 
+import type { SiteEvidence } from "@/lib/analysis/evidence";
 import { classifySite, type SiteCategoryId, type SiteClassification } from "@/lib/analysis/site-category";
+
 import type {
   CategoryId,
   DashboardReport,
@@ -34,8 +36,12 @@ export type PriorityRecommendation = {
   /** Business impact per unit of effort — drives the ranking. */
   impactScore: number;
   /** Why this ranked where it did for this kind of website. */
+  /** Why this ranked where it did for this kind of website. */
   contextNote: string | null;
+  /** Why this recommendation applies to this website at all. */
+  relevanceNote: string;
 };
+
 
 export type ExpectedImpact = {
   label: string;
@@ -146,8 +152,67 @@ type ContextRule = {
   dampTopics: Topic[];
   /** Advice that does not apply to this kind of website at all. */
   dropTopics: Topic[];
+  /**
+   * Topics that are only shown when the page itself carries evidence that the
+   * site operates that way — never because something is simply missing.
+   */
+  gatedTopics?: Topic[];
   focus: string;
 };
+
+/** Signals that a site is genuinely selling something on this page. */
+function hasCommercialEvidence(evidence: SiteEvidence | null): boolean {
+  if (!evidence) return false;
+  return (
+    evidence.content.hasPricingSection ||
+    evidence.content.hasTestimonials ||
+    evidence.links.hasPricing ||
+    evidence.structuredData.types.some((type) => /product|offer|service|store/i.test(type))
+  );
+}
+
+/** Signals that direct contact is part of how this site converts. */
+function hasContactEvidence(evidence: SiteEvidence | null): boolean {
+  if (!evidence) return false;
+  return (
+    evidence.content.hasContactDetails ||
+    evidence.links.mailto > 0 ||
+    evidence.links.tel > 0
+  );
+}
+
+type Relevance = { relevant: boolean; reason: string };
+
+/**
+ * Decides whether an observed recommendation actually applies to this kind of
+ * website. Missing-by-default advice is suppressed instead of being forced in.
+ */
+function assessRelevance(
+  topic: Topic,
+  rule: ContextRule,
+  classification: SiteClassification,
+  evidence: SiteEvidence | null,
+): Relevance {
+  const label = classification.label.toLowerCase();
+
+  if (!rule.gatedTopics?.includes(topic)) {
+    return { relevant: true, reason: `Applies to a ${label} site based on the evidence collected here.` };
+  }
+
+  if (topic === "contact") {
+    return hasContactEvidence(evidence)
+      ? { relevant: true, reason: "Contact details were detected on the page, so this path is already part of how the site converts." }
+      : { relevant: false, reason: "" };
+  }
+
+  return hasCommercialEvidence(evidence)
+    ? {
+        relevant: true,
+        reason: `Commercial signals (pricing, offers or customer proof) were detected during this analysis, so this applies to a ${label} site.`,
+      }
+    : { relevant: false, reason: "" };
+}
+
 
 const DEFAULT_RULE: ContextRule = {
   boostCategories: [],
@@ -159,13 +224,16 @@ const DEFAULT_RULE: ContextRule = {
 
 const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
   enterprise: {
-    boostCategories: ["performance", "accessibility"],
+    boostCategories: ["performance", "accessibility", "seo"],
     boostTopics: ["navigation", "media", "schema", "i18n", "mobile"],
     dampTopics: [],
-    dropTopics: ["testimonials", "pricing", "title-length"],
+    dropTopics: ["title-length"],
+    gatedTopics: ["contact", "testimonials", "pricing"],
+
     focus:
       "Weighted towards performance, accessibility, structured data, media delivery, navigation clarity and internationalisation.",
   },
+
 
   saas: {
     boostCategories: ["business", "design"],
@@ -197,11 +265,13 @@ const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
   },
   utility: {
     boostCategories: ["accessibility", "performance", "design"],
-    boostTopics: ["forms", "cta", "mobile"],
-    dampTopics: ["testimonials", "pricing"],
+    boostTopics: ["forms", "cta", "mobile", "navigation", "search"],
+    dampTopics: [],
     dropTopics: [],
+    gatedTopics: ["testimonials", "pricing"],
     focus: "Weighted towards task completion, clarity of actions, mobile usability, performance and accessibility.",
   },
+
   marketplace: {
     boostCategories: ["business", "performance"],
     boostTopics: ["search", "navigation", "mobile"],
@@ -237,6 +307,7 @@ function toPriorityItem(
   rule: ContextRule,
   classification: SiteClassification,
   strength: number,
+  relevanceNote: string,
 ): PriorityRecommendation {
   const effort = EFFORT_FROM_DIFFICULTY[item.difficulty];
   const topic = topicOf(item);
@@ -272,6 +343,7 @@ function toPriorityItem(
     estimatedGain: item.estimatedGain,
     impactScore: Math.round(base * multiplier * 10) / 10,
     contextNote,
+    relevanceNote,
   };
 }
 
@@ -290,13 +362,24 @@ export function buildPriorityRecommendations(
   const rule = (tuned && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
   const strength = tuned ? 1 : 0.4;
 
-  const source = tuned
-    ? report.recommendations.filter((item) => !rule.dropTopics.includes(topicOf(item)))
-    : report.recommendations;
+  const ranked = (tuned ? report.recommendations : report.recommendations)
+    .flatMap((item) => {
+      const topic = topicOf(item);
+      if (tuned && rule.dropTopics.includes(topic)) return [];
 
-  const ranked = source
-    .map((item) => toPriorityItem(item, rule, classification, strength))
+      const relevance = tuned
+        ? assessRelevance(topic, rule, classification, report.evidence)
+        : {
+            relevant: true,
+            reason:
+              "Website category could not be determined with high confidence, so this is kept under a conservative mixed reading of the evidence.",
+          };
+      if (!relevance.relevant) return [];
+
+      return [toPriorityItem(item, rule, classification, strength, relevance.reason)];
+    })
     .sort((a, b) => b.impactScore - a.impactScore);
+
 
 
   if (!ranked.length) {
