@@ -339,6 +339,18 @@ export function classifySite(evidence: SiteEvidence | null): SiteClassification 
       when: has(text, /\b(check|calculate|search|submit|apply|track|scan|analyz|analys)/),
       describe: "action verbs as the main page actions",
     },
+    {
+      category: "utility",
+      weight: 3,
+      when: schema.some((type) => /softwareapplication|webapplication/.test(type)),
+      describe: "software application structured data",
+    },
+    {
+      category: "utility",
+      weight: 2,
+      when: nav > 0 && nav <= 5 && evidence.content.wordCount < 600 && evidence.forms.total > 0,
+      describe: "application-style navigation around a single task",
+    },
 
     // Marketplace
     {
