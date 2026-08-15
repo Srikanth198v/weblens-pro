@@ -36,8 +36,12 @@ export type PriorityRecommendation = {
   /** Business impact per unit of effort — drives the ranking. */
   impactScore: number;
   /** Why this ranked where it did for this kind of website. */
+  /** Why this ranked where it did for this kind of website. */
   contextNote: string | null;
+  /** Why this recommendation applies to this website at all. */
+  relevanceNote: string;
 };
+
 
 export type ExpectedImpact = {
   label: string;
