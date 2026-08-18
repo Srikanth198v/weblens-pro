@@ -280,10 +280,12 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
       evidence: null,
       confidence: confidenceFor([]),
       evidenceReport: buildEvidenceReport(null),
+      context: buildRecommendationContext(null),
     };
   }
 
   const { categories, factors } = categoriesFrom(result);
+  const context = buildRecommendationContext(result.evidence);
   const overallScore = Math.round(
     categories.reduce(
       (sum, category) => sum + (category.score * CATEGORY_WEIGHT[category.id]) / 100,
@@ -296,11 +298,13 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
     overallScore,
     breakdown: breakdownFrom(categories),
     categories,
-    business: businessFrom(factors),
-    recommendations: recommendationsFrom(factors),
+    business: businessFrom(factors, context),
+    recommendations: recommendationsFrom(factors, context),
     understanding: result.understanding ?? buildUnderstanding(result.evidence),
     evidence: result.evidence,
     confidence: confidenceFor(result.evidence.sources),
     evidenceReport: buildEvidenceReport(result.evidence),
+    context,
   };
+
 }
