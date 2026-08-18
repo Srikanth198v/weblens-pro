@@ -5,6 +5,7 @@ import { buildUnderstanding } from "@/lib/analysis/understanding";
 import {
   assessTopic,
   buildRecommendationContext,
+  filterApplicableText,
   topicForText,
   type RecommendationContext,
 } from "@/lib/analysis/recommendation-context";
@@ -196,7 +197,26 @@ function businessFrom(
     });
 }
 
-function categoriesFrom(result: AnalysisResult): {
+/**
+ * Keeps the "what would improve this" line honest: if the headline suggestion
+ * does not apply to this kind of website, the next applicable one is used.
+ */
+function applicableImprovement(
+  headline: string,
+  suggestions: string[],
+  context: RecommendationContext,
+): string {
+  if (assessTopic(context, topicForText(headline)).applicable) return headline;
+  return (
+    filterApplicableText(context, suggestions)[0] ??
+    "Nothing in this area is holding the site back once the checks that do not apply to this kind of website are set aside."
+  );
+}
+
+function categoriesFrom(
+  result: AnalysisResult,
+  context: RecommendationContext,
+): {
   categories: CategoryDetail[];
   factors: EvidenceFactor[];
 } {
@@ -216,10 +236,10 @@ function categoriesFrom(result: AnalysisResult): {
     })),
     whyThisScore: category.whyThisScore,
     biggestFactor: category.biggestFactor,
-    whatWouldImprove: category.whatWouldImprove,
+    whatWouldImprove: applicableImprovement(category.whatWouldImprove, category.suggestions, context),
     strengths: category.strengths,
-    weaknesses: category.weaknesses,
-    suggestions: category.suggestions,
+    weaknesses: filterApplicableText(context, category.weaknesses),
+    suggestions: filterApplicableText(context, category.suggestions),
   }));
 
   return { categories, factors: evaluation.factors };
@@ -284,8 +304,8 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
     };
   }
 
-  const { categories, factors } = categoriesFrom(result);
   const context = buildRecommendationContext(result.evidence);
+  const { categories, factors } = categoriesFrom(result, context);
   const overallScore = Math.round(
     categories.reduce(
       (sum, category) => sum + (category.score * CATEGORY_WEIGHT[category.id]) / 100,

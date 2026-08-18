@@ -413,3 +413,11 @@ export function assessTopic(context: RecommendationContext, topic: Topic): Appli
 export function assessText(context: RecommendationContext, text: string): Applicability {
   return assessTopic(context, topicForText(text));
 }
+
+/** Drops any statement whose topic does not apply to this kind of website. */
+export function filterApplicableText(
+  context: RecommendationContext,
+  items: string[],
+): string[] {
+  return items.filter((item) => assessTopic(context, topicForText(item)).applicable);
+}
