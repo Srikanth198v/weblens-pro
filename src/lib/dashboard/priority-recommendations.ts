@@ -9,7 +9,12 @@
  */
 
 import type { SiteEvidence } from "@/lib/analysis/evidence";
-import { classifySite, type SiteCategoryId, type SiteClassification } from "@/lib/analysis/site-category";
+import {
+  classifySite,
+  SITE_CATEGORY_LABEL,
+  type SiteCategoryId,
+  type SiteClassification,
+} from "@/lib/analysis/site-category";
 
 import type {
   CategoryId,
@@ -227,14 +232,11 @@ const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
     boostCategories: ["performance", "accessibility", "seo"],
     boostTopics: ["navigation", "media", "schema", "i18n", "mobile"],
     dampTopics: [],
-    dropTopics: ["title-length"],
-    gatedTopics: ["contact", "testimonials", "pricing"],
-
+    dropTopics: ["title-length", "testimonials", "pricing"],
+    gatedTopics: ["contact", "cta"],
     focus:
-      "Weighted towards performance, accessibility, structured data, media delivery, navigation clarity and internationalisation.",
+      "Weighted towards performance, accessibility, SEO, structured data, image delivery, navigation clarity, internationalisation and technical reliability.",
   },
-
-
   saas: {
     boostCategories: ["business", "design"],
     boostTopics: ["cta", "pricing", "testimonials"],
@@ -256,42 +258,56 @@ const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
     dropTopics: [],
     focus: "Weighted towards contact details, hours, location, pricing transparency and trust signals.",
   },
-  content: {
+  restaurant: {
+    boostCategories: ["business", "design"],
+    boostTopics: ["contact", "media", "mobile", "cta"],
+    dampTopics: ["readability"],
+    dropTopics: [],
+    focus: "Weighted towards menu clarity, booking and ordering actions, contact details and mobile usability.",
+  },
+  healthcare: {
+    boostCategories: ["accessibility", "business"],
+    boostTopics: ["contact", "cta", "readability", "forms"],
+    dampTopics: ["pricing"],
+    dropTopics: [],
+    focus: "Weighted towards accessibility, clarity of services, appointment actions and contact details.",
+  },
+  agency: {
+    boostCategories: ["business", "design"],
+    boostTopics: ["cta", "testimonials", "contact", "media"],
+    dampTopics: [],
+    dropTopics: [],
+    focus: "Weighted towards positioning, proof of work, enquiry actions and presentation quality.",
+  },
+  publisher: {
     boostCategories: ["seo", "performance"],
     boostTopics: ["readability", "navigation", "search"],
     dampTopics: ["pricing", "testimonials"],
     dropTopics: [],
     focus: "Weighted towards readability, article structure, internal linking, search and page speed.",
   },
-  utility: {
-    boostCategories: ["accessibility", "performance", "design"],
-    boostTopics: ["forms", "cta", "mobile", "navigation", "search"],
+  community: {
+    boostCategories: ["accessibility", "performance"],
+    boostTopics: ["navigation", "readability", "search", "cta"],
+    dampTopics: ["pricing"],
+    dropTopics: [],
+    gatedTopics: ["testimonials"],
+    focus: "Weighted towards clarity of the main action, navigation, readability and accessibility.",
+  },
+  education: {
+    boostCategories: ["accessibility", "seo"],
+    boostTopics: ["navigation", "readability", "forms", "cta"],
     dampTopics: [],
     dropTopics: [],
     gatedTopics: ["testimonials", "pricing"],
-    focus: "Weighted towards task completion, clarity of actions, mobile usability, performance and accessibility.",
+    focus: "Weighted towards navigation, readability, accessibility and clarity of enrolment actions.",
   },
-
-  marketplace: {
-    boostCategories: ["business", "performance"],
-    boostTopics: ["search", "navigation", "mobile"],
+  government: {
+    boostCategories: ["accessibility", "performance", "seo"],
+    boostTopics: ["navigation", "readability", "forms", "i18n", "mobile"],
     dampTopics: [],
-    dropTopics: [],
-    focus: "Weighted towards listing discovery, search, trust signals and mobile flow.",
-  },
-  community: {
-    boostCategories: ["performance", "accessibility"],
-    boostTopics: ["navigation", "readability", "search"],
-    dampTopics: ["pricing"],
-    dropTopics: [],
-    focus: "Weighted towards navigation, readability, search and page speed.",
-  },
-  nonprofit: {
-    boostCategories: ["accessibility", "business"],
-    boostTopics: ["cta", "contact", "readability"],
-    dampTopics: ["pricing"],
-    dropTopics: [],
-    focus: "Weighted towards clarity of the main action, accessibility and trust signals.",
+    dropTopics: ["testimonials", "pricing", "cta"],
+    focus: "Weighted towards accessibility, findability, plain language, forms and technical reliability.",
   },
   portfolio: {
     boostCategories: ["design", "performance"],
@@ -301,6 +317,48 @@ const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
     focus: "Weighted towards presentation, media delivery and how easily someone can get in touch.",
   },
 };
+
+/**
+ * Merges the primary rule with the secondary characteristics of the site, so a
+ * site that is (for example) an enterprise brand with retail traits keeps the
+ * enterprise suppressions while still gaining relevant retail priorities.
+ */
+function resolveRule(classification: SiteClassification): ContextRule {
+  const primary = CONTEXT_RULES[classification.primaryCategory] ?? DEFAULT_RULE;
+  const secondaries = classification.secondaryCategories
+    .map((id) => CONTEXT_RULES[id])
+    .filter((rule): rule is ContextRule => !!rule);
+
+  if (!secondaries.length) return primary;
+
+  const merged: ContextRule = {
+    boostCategories: [...primary.boostCategories],
+    boostTopics: [...primary.boostTopics],
+    dampTopics: [...primary.dampTopics],
+    dropTopics: [...primary.dropTopics],
+    gatedTopics: [...(primary.gatedTopics ?? [])],
+    focus: primary.focus,
+  };
+
+  for (const rule of secondaries) {
+    for (const category of rule.boostCategories) {
+      if (!merged.boostCategories.includes(category) && !merged.dropTopics.length) {
+        merged.boostCategories.push(category);
+      }
+    }
+    for (const topic of rule.boostTopics) {
+      // The primary category always wins: never re-introduce what it drops.
+      if (merged.dropTopics.includes(topic) || merged.dampTopics.includes(topic)) continue;
+      if (!merged.boostTopics.includes(topic)) merged.boostTopics.push(topic);
+    }
+  }
+
+  const labels = classification.secondaryCategories.map((id) => SITE_CATEGORY_LABEL[id].toLowerCase());
+  merged.focus = `${primary.focus} Secondary ${labels.join(" and ")} characteristics were also taken into account.`;
+
+  return merged;
+}
+
 
 function toPriorityItem(
   item: Recommendation,
@@ -356,10 +414,10 @@ export function buildPriorityRecommendations(
   // Enterprise rules apply from 50% confidence upwards; every other category
   // waits for the usual 70% threshold before tuning kicks in.
   const enterpriseTuned =
-    classification.category === "enterprise" && classification.confidence >= 50;
+    classification.primaryCategory === "enterprise" && classification.confidence >= 50;
   const tuned = enterpriseTuned || !classification.conservative;
 
-  const rule = (tuned && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
+  const rule = tuned ? resolveRule(classification) : DEFAULT_RULE;
   const strength = tuned ? 1 : 0.4;
 
   const ranked = (tuned ? report.recommendations : report.recommendations)
