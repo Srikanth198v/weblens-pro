@@ -11,6 +11,7 @@
 
 import type { EvidenceSourceId, SiteEvidence, WebsiteUnderstanding } from "@/lib/analysis/evidence";
 import type { EvidenceReport } from "@/lib/dashboard/evidence-report";
+import type { RecommendationContext } from "@/lib/analysis/recommendation-context";
 
 export type ScoreStatus = "excellent" | "good" | "needs-improvement";
 
@@ -46,6 +47,10 @@ export type BusinessMetric = {
   explanation: string;
   /** The measurement the explanation is based on. */
   evidence: string;
+  /** False when this check does not apply to the kind of website detected. */
+  applicable: boolean;
+  /** Why the check was marked "Not applicable". */
+  notApplicableReason: string | null;
 };
 
 export type RecommendationPriority = "high" | "medium" | "low";
@@ -116,4 +121,6 @@ export type DashboardReport = {
   confidence: ReportConfidence;
   /** Auditable ledger of what was collected, what wasn't, and how sure we are. */
   evidenceReport: EvidenceReport;
+  /** Shared classification + relevance rules used by every advice layer. */
+  context: RecommendationContext;
 };

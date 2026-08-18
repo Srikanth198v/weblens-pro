@@ -20,6 +20,7 @@ export function BusinessReview({ metrics }: { metrics: BusinessMetric[] }) {
 function MetricCard({ metric, delay }: { metric: BusinessMetric; delay: number }) {
   const { ref, inView } = useInView<HTMLDivElement>();
   const status = statusForScore(metric.score);
+  const applicable = metric.applicable !== false;
 
   return (
     <div
@@ -29,15 +30,21 @@ function MetricCard({ metric, delay }: { metric: BusinessMetric; delay: number }
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-sm font-semibold text-foreground">{metric.label}</p>
         <p className="font-display text-lg font-bold tabular-nums text-foreground">
-          {metric.score}
+          {applicable ? metric.score : "—"}
         </p>
       </div>
 
-      <ScoreBar score={metric.score} active={inView} delay={delay} className="mt-3" />
+      {applicable ? (
+        <>
+          <ScoreBar score={metric.score} active={inView} delay={delay} className="mt-3" />
+          <p className={`mt-3 text-xs font-semibold ${STATUS_TEXT_CLASS[status]}`}>
+            {STATUS_LABEL[status]}
+          </p>
+        </>
+      ) : (
+        <p className="mt-3 text-xs font-semibold text-muted-foreground">Not applicable</p>
+      )}
 
-      <p className={`mt-3 text-xs font-semibold ${STATUS_TEXT_CLASS[status]}`}>
-        {STATUS_LABEL[status]}
-      </p>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{metric.explanation}</p>
       <p className="mt-3 rounded-xl bg-surface p-3 text-xs leading-relaxed text-foreground/75">
         <span className="font-semibold text-foreground">Measured: </span>
@@ -46,3 +53,4 @@ function MetricCard({ metric, delay }: { metric: BusinessMetric; delay: number }
     </div>
   );
 }
+

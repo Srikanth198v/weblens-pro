@@ -2,6 +2,13 @@ import { EVIDENCE_SOURCE_LABEL, type EvidenceSourceId } from "@/lib/analysis/evi
 import { buildEvidenceReport } from "@/lib/dashboard/evidence-report";
 import { evaluateEvidence, type EvidenceFactor } from "@/lib/analysis/score-from-evidence";
 import { buildUnderstanding } from "@/lib/analysis/understanding";
+import {
+  assessTopic,
+  buildRecommendationContext,
+  filterApplicableText,
+  topicForText,
+  type RecommendationContext,
+} from "@/lib/analysis/recommendation-context";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import {
   CATEGORY_BUSINESS_IMPACT,
@@ -98,10 +105,20 @@ function estimatedGainFor(factor: EvidenceFactor, factors: EvidenceFactor[]): nu
   return Math.max(1, Math.round(overallPoints));
 }
 
-/** One recommendation per failing measurement — never more, never invented. */
-function recommendationsFrom(factors: EvidenceFactor[]): Recommendation[] {
+/**
+ * One recommendation per failing measurement — never more, never invented, and
+ * only when the finding is relevant to the kind of website detected.
+ */
+function recommendationsFrom(
+  factors: EvidenceFactor[],
+  context: RecommendationContext,
+): Recommendation[] {
   const items = factors
     .filter((factor) => factor.remedy && factor.verdict !== "pass")
+    .filter((factor) => {
+      const remedy = factor.remedy!;
+      return assessTopic(context, topicForText(`${remedy.title} ${remedy.description}`)).applicable;
+    })
     .map((factor) => {
       const remedy = factor.remedy!;
       const gain = estimatedGainFor(factor, factors);
@@ -140,7 +157,10 @@ function recommendationsFrom(factors: EvidenceFactor[]): Recommendation[] {
  * The business review re-reads the same measurements from a commercial angle.
  * Each metric names the evidence it is based on.
  */
-function businessFrom(factors: EvidenceFactor[]): BusinessMetric[] {
+function businessFrom(
+  factors: EvidenceFactor[],
+  context: RecommendationContext,
+): BusinessMetric[] {
   const LABELS: Record<string, string> = {
     "biz-cta": "Call To Action",
     "biz-proof": "Trust & Testimonials",
@@ -156,19 +176,47 @@ function businessFrom(factors: EvidenceFactor[]): BusinessMetric[] {
 
   return factors
     .filter((factor) => factor.id in LABELS)
-    .map((factor) => ({
-      id: factor.id,
-      label: LABELS[factor.id]!,
-      score: factor.score,
-      explanation:
-        factor.verdict === "pass"
-          ? `${factor.detail}. This is working in your favour as it stands.`
-          : `${factor.detail}. ${factor.improvement ?? "Worth revisiting when you next touch the page."}`,
-      evidence: factor.detail,
-    }));
+    .map((factor) => {
+      const label = LABELS[factor.id]!;
+      const applicability = assessTopic(context, topicForText(`${label} ${factor.label}`));
+      const applicable = applicability.applicable || factor.verdict === "pass";
+
+      return {
+        id: factor.id,
+        label,
+        score: factor.score,
+        explanation: !applicable
+          ? `${factor.detail}. This is not counted against the site: ${applicability.notApplicableReason ?? "the check does not apply to this kind of website."}`
+          : factor.verdict === "pass"
+            ? `${factor.detail}. This is working in your favour as it stands.`
+            : `${factor.detail}. ${factor.improvement ?? "Worth revisiting when you next touch the page."}`,
+        evidence: factor.detail,
+        applicable,
+        notApplicableReason: applicable ? null : applicability.notApplicableReason,
+      } satisfies BusinessMetric;
+    });
 }
 
-function categoriesFrom(result: AnalysisResult): {
+/**
+ * Keeps the "what would improve this" line honest: if the headline suggestion
+ * does not apply to this kind of website, the next applicable one is used.
+ */
+function applicableImprovement(
+  headline: string,
+  suggestions: string[],
+  context: RecommendationContext,
+): string {
+  if (assessTopic(context, topicForText(headline)).applicable) return headline;
+  return (
+    filterApplicableText(context, suggestions)[0] ??
+    "Nothing in this area is holding the site back once the checks that do not apply to this kind of website are set aside."
+  );
+}
+
+function categoriesFrom(
+  result: AnalysisResult,
+  context: RecommendationContext,
+): {
   categories: CategoryDetail[];
   factors: EvidenceFactor[];
 } {
@@ -188,10 +236,10 @@ function categoriesFrom(result: AnalysisResult): {
     })),
     whyThisScore: category.whyThisScore,
     biggestFactor: category.biggestFactor,
-    whatWouldImprove: category.whatWouldImprove,
+    whatWouldImprove: applicableImprovement(category.whatWouldImprove, category.suggestions, context),
     strengths: category.strengths,
-    weaknesses: category.weaknesses,
-    suggestions: category.suggestions,
+    weaknesses: filterApplicableText(context, category.weaknesses),
+    suggestions: filterApplicableText(context, category.suggestions),
   }));
 
   return { categories, factors: evaluation.factors };
@@ -252,10 +300,12 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
       evidence: null,
       confidence: confidenceFor([]),
       evidenceReport: buildEvidenceReport(null),
+      context: buildRecommendationContext(null),
     };
   }
 
-  const { categories, factors } = categoriesFrom(result);
+  const context = buildRecommendationContext(result.evidence);
+  const { categories, factors } = categoriesFrom(result, context);
   const overallScore = Math.round(
     categories.reduce(
       (sum, category) => sum + (category.score * CATEGORY_WEIGHT[category.id]) / 100,
@@ -268,11 +318,13 @@ export function buildDashboardReport(result: AnalysisResult): DashboardReport {
     overallScore,
     breakdown: breakdownFrom(categories),
     categories,
-    business: businessFrom(factors),
-    recommendations: recommendationsFrom(factors),
+    business: businessFrom(factors, context),
+    recommendations: recommendationsFrom(factors, context),
     understanding: result.understanding ?? buildUnderstanding(result.evidence),
     evidence: result.evidence,
     confidence: confidenceFor(result.evidence.sources),
     evidenceReport: buildEvidenceReport(result.evidence),
+    context,
   };
+
 }

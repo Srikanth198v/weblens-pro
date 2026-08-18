@@ -7,6 +7,7 @@
  * report. Where a signal is missing, the agent says so explicitly.
  */
 
+import { filterApplicableText } from "@/lib/analysis/recommendation-context";
 import type { CategoryDetail, CategoryId, DashboardReport } from "@/lib/dashboard/types";
 
 export const NO_EVIDENCE = "Not enough evidence collected during this analysis.";
@@ -102,7 +103,10 @@ function buildAgent(
 ): SpecialistAgent {
   const category = byId(report, config.category);
   const strengths = [...(config.extraStrengths ?? []), ...(category?.strengths ?? [])];
-  const opportunities = [...(config.extraOpportunities ?? []), ...(category?.weaknesses ?? [])];
+  const opportunities = filterApplicableText(report.context, [
+    ...(config.extraOpportunities ?? []),
+    ...(category?.weaknesses ?? []),
+  ]);
   const signals = strengths.length + opportunities.length;
 
   return {
@@ -155,6 +159,12 @@ function copywritingAgent(report: DashboardReport): SpecialistAgent {
 
   if (understanding?.positioning) strengths.push(understanding.positioning);
 
+  // Suppress advice that does not apply to this kind of website (for example
+  // proof copy on a global brand page with no commercial signals).
+  const applicable = filterApplicableText(report.context, opportunities);
+  opportunities.length = 0;
+  opportunities.push(...applicable);
+
   const signals = strengths.length + opportunities.length;
   const verdict = !evidence
     ? NO_EVIDENCE
@@ -164,6 +174,8 @@ function copywritingAgent(report: DashboardReport): SpecialistAgent {
 
   const action = !evidence
     ? NO_EVIDENCE
+    : !opportunities.length
+      ? "The written message is already carrying its weight — keep it as the standard for new pages."
     : !evidence.content.ctas.length
       ? "Add one explicit primary action in the hero, written as the visitor's next step (for example \"Book a call\"), and repeat it once near the foot of the page."
       : !evidence.metadata.description

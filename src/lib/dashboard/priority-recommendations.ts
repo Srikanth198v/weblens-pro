@@ -6,15 +6,18 @@
  * performance, accessibility, business signals and visual analysis), keeps the
  * three to five with the strongest business impact per unit of effort, and
  * frames them the way a senior consultant would: hedged, specific, actionable.
+ *
+ * Relevance is decided once, in the shared recommendation context, so every
+ * section of the report applies exactly the same contextual rules.
  */
 
-import type { SiteEvidence } from "@/lib/analysis/evidence";
 import {
-  classifySite,
-  SITE_CATEGORY_LABEL,
-  type SiteCategoryId,
-  type SiteClassification,
-} from "@/lib/analysis/site-category";
+  assessTopic,
+  buildRecommendationContext,
+  topicForText,
+  type RecommendationContext,
+} from "@/lib/analysis/recommendation-context";
+import type { SiteClassification } from "@/lib/analysis/site-category";
 
 import type {
   CategoryId,
@@ -41,12 +44,10 @@ export type PriorityRecommendation = {
   /** Business impact per unit of effort — drives the ranking. */
   impactScore: number;
   /** Why this ranked where it did for this kind of website. */
-  /** Why this ranked where it did for this kind of website. */
   contextNote: string | null;
   /** Why this recommendation applies to this website at all. */
   relevanceNote: string;
 };
-
 
 export type ExpectedImpact = {
   label: string;
@@ -66,7 +67,6 @@ export type PriorityRecommendationsView = {
   /** How the ranking was tuned for that kind of website. */
   focus: string;
 };
-
 
 const EFFORT_FROM_DIFFICULTY: Record<RecommendationDifficulty, PriorityEffort> = {
   Easy: "Easy",
@@ -106,286 +106,30 @@ const EXPECTED_IMPACT: Record<CategoryId, ExpectedImpact> = {
   },
 };
 
-/**
- * Topics let us tune advice to the kind of website that was detected without
- * ever inventing a finding — a topic only matches text that came from a
- * measured recommendation.
- */
-type Topic =
-  | "testimonials"
-  | "pricing"
-  | "cta"
-  | "contact"
-  | "navigation"
-  | "media"
-  | "title-length"
-  | "readability"
-  | "mobile"
-  | "search"
-  | "forms"
-  | "schema"
-  | "i18n"
-  | "other";
-
-const TOPIC_PATTERNS: Array<{ topic: Topic; pattern: RegExp }> = [
-  { topic: "testimonials", pattern: /testimonial|review|social proof|customer proof|case stud/i },
-  { topic: "schema", pattern: /structured data|schema|json-?ld|rich result|microdata/i },
-  { topic: "i18n", pattern: /language|hreflang|localis|localiz|internationalis|internationaliz|region|locale/i },
-  { topic: "pricing", pattern: /pricing|price|plans?\b/i },
-  { topic: "cta", pattern: /call to action|cta|conversion|sign[- ]?up|primary action/i },
-  { topic: "contact", pattern: /contact|phone|address|enquir|inquir/i },
-  { topic: "navigation", pattern: /navigation|internal link|menu|structure of the page|sitemap/i },
-  { topic: "media", pattern: /image|media|lazy|dimension|format|screenshot|video/i },
-  { topic: "title-length", pattern: /title (tag|length)|meta title|shorten the title|description length/i },
-  { topic: "readability", pattern: /heading|readab|content length|word count|copy/i },
-  { topic: "mobile", pattern: /mobile|viewport|small screen|touch/i },
-  { topic: "search", pattern: /search|discover|find (products|content)/i },
-  { topic: "forms", pattern: /form|input|label|field/i },
-];
-
-
-function topicOf(item: Recommendation): Topic {
-  const text = `${item.title} ${item.description}`;
-  return TOPIC_PATTERNS.find((entry) => entry.pattern.test(text))?.topic ?? "other";
-}
-
-type ContextRule = {
-  /** Areas that matter most for this kind of website. */
-  boostCategories: CategoryId[];
-  boostTopics: Topic[];
-  /** Advice that is usually noise for this kind of website. */
-  dampTopics: Topic[];
-  /** Advice that does not apply to this kind of website at all. */
-  dropTopics: Topic[];
-  /**
-   * Topics that are only shown when the page itself carries evidence that the
-   * site operates that way — never because something is simply missing.
-   */
-  gatedTopics?: Topic[];
-  focus: string;
-};
-
-/** Signals that a site is genuinely selling something on this page. */
-function hasCommercialEvidence(evidence: SiteEvidence | null): boolean {
-  if (!evidence) return false;
-  return (
-    evidence.content.hasPricingSection ||
-    evidence.content.hasTestimonials ||
-    evidence.links.hasPricing ||
-    evidence.structuredData.types.some((type) => /product|offer|service|store/i.test(type))
-  );
-}
-
-/** Signals that direct contact is part of how this site converts. */
-function hasContactEvidence(evidence: SiteEvidence | null): boolean {
-  if (!evidence) return false;
-  return (
-    evidence.content.hasContactDetails ||
-    evidence.links.mailto > 0 ||
-    evidence.links.tel > 0
-  );
-}
-
-type Relevance = { relevant: boolean; reason: string };
-
-/**
- * Decides whether an observed recommendation actually applies to this kind of
- * website. Missing-by-default advice is suppressed instead of being forced in.
- */
-function assessRelevance(
-  topic: Topic,
-  rule: ContextRule,
-  classification: SiteClassification,
-  evidence: SiteEvidence | null,
-): Relevance {
-  const label = classification.label.toLowerCase();
-
-  if (!rule.gatedTopics?.includes(topic)) {
-    return { relevant: true, reason: `Applies to a ${label} site based on the evidence collected here.` };
-  }
-
-  if (topic === "contact") {
-    return hasContactEvidence(evidence)
-      ? { relevant: true, reason: "Contact details were detected on the page, so this path is already part of how the site converts." }
-      : { relevant: false, reason: "" };
-  }
-
-  return hasCommercialEvidence(evidence)
-    ? {
-        relevant: true,
-        reason: `Commercial signals (pricing, offers or customer proof) were detected during this analysis, so this applies to a ${label} site.`,
-      }
-    : { relevant: false, reason: "" };
-}
-
-
-const DEFAULT_RULE: ContextRule = {
-  boostCategories: [],
-  boostTopics: [],
-  dampTopics: [],
-  dropTopics: [],
-  focus: "Priorities are balanced across every area measured during this analysis.",
-};
-
-const CONTEXT_RULES: Partial<Record<SiteCategoryId, ContextRule>> = {
-  enterprise: {
-    boostCategories: ["performance", "accessibility", "seo"],
-    boostTopics: ["navigation", "media", "schema", "i18n", "mobile"],
-    dampTopics: [],
-    dropTopics: ["title-length", "testimonials", "pricing"],
-    gatedTopics: ["contact", "cta"],
-    focus:
-      "Weighted towards performance, accessibility, SEO, structured data, image delivery, navigation clarity, internationalisation and technical reliability.",
-  },
-  saas: {
-    boostCategories: ["business", "design"],
-    boostTopics: ["cta", "pricing", "testimonials"],
-    dampTopics: ["contact"],
-    dropTopics: [],
-    focus: "Weighted towards onboarding, value proposition, CTA hierarchy, pricing clarity and social proof.",
-  },
-  ecommerce: {
-    boostCategories: ["performance", "business"],
-    boostTopics: ["search", "media", "mobile", "cta"],
-    dampTopics: ["readability"],
-    dropTopics: [],
-    focus: "Weighted towards product discovery, search, trust signals, checkout flow and mobile conversion.",
-  },
-  local: {
-    boostCategories: ["business"],
-    boostTopics: ["contact", "testimonials", "pricing", "mobile"],
-    dampTopics: [],
-    dropTopics: [],
-    focus: "Weighted towards contact details, hours, location, pricing transparency and trust signals.",
-  },
-  restaurant: {
-    boostCategories: ["business", "design"],
-    boostTopics: ["contact", "media", "mobile", "cta"],
-    dampTopics: ["readability"],
-    dropTopics: [],
-    focus: "Weighted towards menu clarity, booking and ordering actions, contact details and mobile usability.",
-  },
-  healthcare: {
-    boostCategories: ["accessibility", "business"],
-    boostTopics: ["contact", "cta", "readability", "forms"],
-    dampTopics: ["pricing"],
-    dropTopics: [],
-    focus: "Weighted towards accessibility, clarity of services, appointment actions and contact details.",
-  },
-  agency: {
-    boostCategories: ["business", "design"],
-    boostTopics: ["cta", "testimonials", "contact", "media"],
-    dampTopics: [],
-    dropTopics: [],
-    focus: "Weighted towards positioning, proof of work, enquiry actions and presentation quality.",
-  },
-  publisher: {
-    boostCategories: ["seo", "performance"],
-    boostTopics: ["readability", "navigation", "search"],
-    dampTopics: ["pricing", "testimonials"],
-    dropTopics: [],
-    focus: "Weighted towards readability, article structure, internal linking, search and page speed.",
-  },
-  community: {
-    boostCategories: ["accessibility", "performance"],
-    boostTopics: ["navigation", "readability", "search", "cta"],
-    dampTopics: ["pricing"],
-    dropTopics: [],
-    gatedTopics: ["testimonials"],
-    focus: "Weighted towards clarity of the main action, navigation, readability and accessibility.",
-  },
-  education: {
-    boostCategories: ["accessibility", "seo"],
-    boostTopics: ["navigation", "readability", "forms", "cta"],
-    dampTopics: [],
-    dropTopics: [],
-    gatedTopics: ["testimonials", "pricing"],
-    focus: "Weighted towards navigation, readability, accessibility and clarity of enrolment actions.",
-  },
-  government: {
-    boostCategories: ["accessibility", "performance", "seo"],
-    boostTopics: ["navigation", "readability", "forms", "i18n", "mobile"],
-    dampTopics: [],
-    dropTopics: ["testimonials", "pricing", "cta"],
-    focus: "Weighted towards accessibility, findability, plain language, forms and technical reliability.",
-  },
-  portfolio: {
-    boostCategories: ["design", "performance"],
-    boostTopics: ["media", "contact", "cta"],
-    dampTopics: ["pricing"],
-    dropTopics: [],
-    focus: "Weighted towards presentation, media delivery and how easily someone can get in touch.",
-  },
-};
-
-/**
- * Merges the primary rule with the secondary characteristics of the site, so a
- * site that is (for example) an enterprise brand with retail traits keeps the
- * enterprise suppressions while still gaining relevant retail priorities.
- */
-function resolveRule(classification: SiteClassification): ContextRule {
-  const primary = CONTEXT_RULES[classification.primaryCategory] ?? DEFAULT_RULE;
-  const secondaries = classification.secondaryCategories
-    .map((id) => CONTEXT_RULES[id])
-    .filter((rule): rule is ContextRule => !!rule);
-
-  if (!secondaries.length) return primary;
-
-  const merged: ContextRule = {
-    boostCategories: [...primary.boostCategories],
-    boostTopics: [...primary.boostTopics],
-    dampTopics: [...primary.dampTopics],
-    dropTopics: [...primary.dropTopics],
-    gatedTopics: [...(primary.gatedTopics ?? [])],
-    focus: primary.focus,
-  };
-
-  for (const rule of secondaries) {
-    for (const category of rule.boostCategories) {
-      if (!merged.boostCategories.includes(category) && !merged.dropTopics.length) {
-        merged.boostCategories.push(category);
-      }
-    }
-    for (const topic of rule.boostTopics) {
-      // The primary category always wins: never re-introduce what it drops.
-      if (merged.dropTopics.includes(topic) || merged.dampTopics.includes(topic)) continue;
-      if (!merged.boostTopics.includes(topic)) merged.boostTopics.push(topic);
-    }
-  }
-
-  const labels = classification.secondaryCategories.map((id) => SITE_CATEGORY_LABEL[id].toLowerCase());
-  merged.focus = `${primary.focus} Secondary ${labels.join(" and ")} characteristics were also taken into account.`;
-
-  return merged;
-}
-
-
 function toPriorityItem(
   item: Recommendation,
-  rule: ContextRule,
-  classification: SiteClassification,
-  strength: number,
+  context: RecommendationContext,
   relevanceNote: string,
 ): PriorityRecommendation {
   const effort = EFFORT_FROM_DIFFICULTY[item.difficulty];
-  const topic = topicOf(item);
+  const topic = topicForText(`${item.title} ${item.description}`);
+  const { rule, strength, classification } = context;
 
   const base =
     ((item.estimatedGain + 1) * PRIORITY_WEIGHT[item.priority] * IMPACT_WEIGHT[item.impact]) /
     EFFORT_COST[effort];
 
-
-
   let multiplier = 1;
   let contextNote: string | null = null;
+  const label = context.utility ? "utility / dashboard" : classification.label.toLowerCase();
 
   if (rule.boostCategories.includes(item.category) || rule.boostTopics.includes(topic)) {
     multiplier += 0.45 * strength;
-    contextNote = `Raised for a ${classification.label.toLowerCase()} site, based on the signals observed during this analysis.`;
+    contextNote = `Raised for a ${label} site, based on the signals observed during this analysis.`;
   }
   if (rule.dampTopics.includes(topic)) {
     multiplier -= 0.35 * strength;
-    contextNote = `Kept lower for a ${classification.label.toLowerCase()} site — other observed issues appear to matter more here.`;
+    contextNote = `Kept lower for a ${label} site — other observed issues appear to matter more here.`;
   }
 
   return {
@@ -409,36 +153,18 @@ export function buildPriorityRecommendations(
   report: DashboardReport,
   classificationInput?: SiteClassification,
 ): PriorityRecommendationsView {
-  const classification = classificationInput ?? classifySite(report.evidence);
+  const context =
+    classificationInput || !report.context
+      ? buildRecommendationContext(report.evidence, classificationInput)
+      : report.context;
 
-  // Enterprise rules apply from 50% confidence upwards; every other category
-  // waits for the usual 70% threshold before tuning kicks in.
-  const enterpriseTuned =
-    classification.primaryCategory === "enterprise" && classification.confidence >= 50;
-  const tuned = enterpriseTuned || !classification.conservative;
-
-  const rule = tuned ? resolveRule(classification) : DEFAULT_RULE;
-  const strength = tuned ? 1 : 0.4;
-
-  const ranked = (tuned ? report.recommendations : report.recommendations)
+  const ranked = report.recommendations
     .flatMap((item) => {
-      const topic = topicOf(item);
-      if (tuned && rule.dropTopics.includes(topic)) return [];
-
-      const relevance = tuned
-        ? assessRelevance(topic, rule, classification, report.evidence)
-        : {
-            relevant: true,
-            reason:
-              "Website category could not be determined with high confidence, so this is kept under a conservative mixed reading of the evidence.",
-          };
-      if (!relevance.relevant) return [];
-
-      return [toPriorityItem(item, rule, classification, strength, relevance.reason)];
+      const applicability = assessTopic(context, topicForText(`${item.title} ${item.description}`));
+      if (!applicability.applicable) return [];
+      return [toPriorityItem(item, context, applicability.reason)];
     })
     .sort((a, b) => b.impactScore - a.impactScore);
-
-
 
   if (!ranked.length) {
     return {
@@ -448,8 +174,8 @@ export function buildPriorityRecommendations(
       emptyReason: report.evidence
         ? "No blocking issues were detected during this analysis, so there is nothing to prioritise right now."
         : "This analysis was saved before evidence collection, so priorities could not be derived. Re-running the analysis would rebuild them.",
-      classification,
-      focus: DEFAULT_RULE.focus,
+      classification: context.classification,
+      focus: context.focus,
     };
   }
 
@@ -459,14 +185,19 @@ export function buildPriorityRecommendations(
   const doThisFirst =
     [...items]
       .sort(
-        (a, b) =>
-          EFFORT_COST[a.effort] - EFFORT_COST[b.effort] || b.impactScore - a.impactScore,
+        (a, b) => EFFORT_COST[a.effort] - EFFORT_COST[b.effort] || b.impactScore - a.impactScore,
       )
       .at(0) ?? null;
 
   const categories = Array.from(new Set(items.map((item) => item.category)));
   const expectedImpact = categories.map((category) => EXPECTED_IMPACT[category]);
 
-  return { items, doThisFirst, expectedImpact, emptyReason: null, classification, focus: rule.focus };
+  return {
+    items,
+    doThisFirst,
+    expectedImpact,
+    emptyReason: null,
+    classification: context.classification,
+    focus: context.focus,
+  };
 }
-
