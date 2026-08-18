@@ -9,7 +9,12 @@
  */
 
 import type { SiteEvidence } from "@/lib/analysis/evidence";
-import { classifySite, type SiteCategoryId, type SiteClassification } from "@/lib/analysis/site-category";
+import {
+  classifySite,
+  SITE_CATEGORY_LABEL,
+  type SiteCategoryId,
+  type SiteClassification,
+} from "@/lib/analysis/site-category";
 
 import type {
   CategoryId,
@@ -409,10 +414,10 @@ export function buildPriorityRecommendations(
   // Enterprise rules apply from 50% confidence upwards; every other category
   // waits for the usual 70% threshold before tuning kicks in.
   const enterpriseTuned =
-    classification.category === "enterprise" && classification.confidence >= 50;
+    classification.primaryCategory === "enterprise" && classification.confidence >= 50;
   const tuned = enterpriseTuned || !classification.conservative;
 
-  const rule = (tuned && CONTEXT_RULES[classification.category]) || DEFAULT_RULE;
+  const rule = tuned ? resolveRule(classification) : DEFAULT_RULE;
   const strength = tuned ? 1 : 0.4;
 
   const ranked = (tuned ? report.recommendations : report.recommendations)
