@@ -4,6 +4,7 @@ import { lazy, Suspense, useMemo } from "react";
 import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-state";
 import { DashboardErrorState } from "@/components/dashboard/dashboard-error-state";
 import { AiConfidenceCard } from "@/components/dashboard/ai-confidence-card";
+import { AskWebLens } from "@/components/chat/ask-weblens";
 import { EvidenceSummary } from "@/components/dashboard/evidence-summary";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { SiteNav } from "@/components/layout/site-nav";
@@ -167,6 +168,8 @@ function ReportBody({
           <MethodologySection evidenceReport={report.evidenceReport} />
         </Suspense>
       </DashboardSection>
+
+      <AskWebLens report={report} />
 
       <DashboardSection id="export" eyebrow="Section 08" title="Export Center">
         <Suspense fallback={<SectionFallback />}>

@@ -5,6 +5,7 @@ import { DashboardEmptyState } from "@/components/dashboard/dashboard-empty-stat
 import { DashboardErrorState } from "@/components/dashboard/dashboard-error-state";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { AiConfidenceCard } from "@/components/dashboard/ai-confidence-card";
+import { AskWebLens } from "@/components/chat/ask-weblens";
 import { AiWebsiteUnderstandingSection } from "@/components/dashboard/ai-website-understanding";
 import { EvidenceSummary } from "@/components/dashboard/evidence-summary";
 import { OverallScore } from "@/components/dashboard/overall-score";
@@ -319,6 +320,8 @@ function DashboardContent({
           <MethodologySection evidenceReport={report.evidenceReport} />
         </Suspense>
       </DashboardSection>
+
+      <AskWebLens report={report} />
 
       <DashboardSection id="export" eyebrow="Section 17" title="Export">
         <Suspense fallback={<SectionFallback />}>
