@@ -1,34 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 
-import type { AskReportContext } from "@/lib/chat/context";
-import { FREE_MESSAGE_LIMIT, type AskMessage, type AskRequest, type AskResponse } from "@/lib/chat/ask.shared";
-
-function validate(input: unknown): AskRequest {
-  const value = (input ?? {}) as Partial<AskRequest>;
-  const context = value.context as AskReportContext | undefined;
-  if (!context || typeof context.url !== "string" || !context.url) {
-    throw new Error("A completed analysis is required.");
-  }
-
-  const messages: AskMessage[] = (Array.isArray(value.messages) ? value.messages : [])
-    .map((item) => item as Partial<AskMessage>)
-    .filter(
-      (item): item is AskMessage =>
-        (item.role === "user" || item.role === "assistant") &&
-        typeof item.content === "string" &&
-        item.content.trim().length > 0,
-    )
-    .slice(-12)
-    .map((item) => ({ role: item.role, content: item.content.slice(0, 1200) }));
-
-  if (!messages.some((item) => item.role === "user")) throw new Error("A question is required.");
-
-  return { context, messages };
-}
+import { FREE_MESSAGE_LIMIT, validateAskRequest, type AskResponse } from "@/lib/chat/ask.shared";
 
 export const askWebLens = createServerFn({ method: "POST" })
-  .inputValidator(validate)
+  .inputValidator(validateAskRequest)
   .handler(async ({ data }): Promise<AskResponse> => {
     const password =
       process.env["ASK_SESSION_SECRET"] ??
