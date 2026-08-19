@@ -102,7 +102,14 @@ export async function askModel(brief: string, messages: AskMessage[]): Promise<s
     throw new Error("WebLens AI could not answer just now. Please try again.");
   }
 
-  const payload = (await response.json()) as { choices?: { message?: { content?: unknown } }[] };
+  const rawBody = await response.text();
+  let payload: { choices?: { message?: { content?: unknown } }[] };
+  try {
+    payload = JSON.parse(rawBody) as { choices?: { message?: { content?: unknown } }[] };
+  } catch {
+    console.error("Ask WebLens AI received a non-JSON response", rawBody.slice(0, 200));
+    throw new Error("WebLens AI is unreachable right now. Please try again in a moment.");
+  }
   const content = payload.choices?.[0]?.message?.content;
   const answer = typeof content === "string" ? content.trim() : "";
   if (!answer) throw new Error("WebLens AI returned an empty answer. Please try again.");
