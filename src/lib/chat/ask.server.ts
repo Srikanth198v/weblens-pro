@@ -8,9 +8,10 @@
 import type { AskReportContext } from "@/lib/chat/context";
 import type { AskMessage } from "@/lib/chat/ask.shared";
 
-const BASE_URL = "https://agentrouter.org/v1";
-const MODEL = "gpt-5.6-sol";
-const TIMEOUT_MS = 30_000;
+const AGENTROUTER_URL = "https://agentrouter.org/v1/chat/completions";
+const AGENTROUTER_MODEL = "gpt-5.6-sol";
+const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const GATEWAY_MODEL = "google/gemini-3-flash-preview";
 
 export const SYSTEM_PROMPT = `You are WebLens AI, the in-product analysis assistant. You are never "ChatGPT" or "OpenAI" — you are WebLens AI.
 
@@ -79,16 +80,23 @@ export function buildBrief(context: AskReportContext): string {
     .join("\n\n");
 }
 
-export async function askModel(brief: string, messages: AskMessage[]): Promise<string> {
-  const apiKey = process.env["AGENTROUTER_API_KEY"];
-  if (!apiKey) throw new Error("The assistant is not configured on this deployment.");
+type Provider = { name: string; url: string; model: string; key: string };
 
-  const response = await fetch(`${BASE_URL}/chat/completions`, {
+/** Calls one OpenAI-compatible provider and returns its answer text. */
+async function callProvider(
+  provider: Provider,
+  brief: string,
+  messages: AskMessage[],
+): Promise<string> {
+  const response = await fetch(provider.url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${provider.key}`,
+    },
     body: JSON.stringify({
-      model: MODEL,
+      model: provider.model,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "system", content: `Report brief for this conversation:\n\n${brief}` },
@@ -97,22 +105,77 @@ export async function askModel(brief: string, messages: AskMessage[]): Promise<s
     }),
   });
 
+  const rawBody = await response.text();
+
   if (!response.ok) {
-    console.error(`Ask WebLens AI failed: ${response.status}`);
-    throw new Error("WebLens AI could not answer just now. Please try again.");
+    console.error(
+      `[ask-weblens] ${provider.name} HTTP ${response.status}: ${rawBody.slice(0, 400)}`,
+    );
+    throw new Error(`${provider.name} responded with status ${response.status}`);
   }
 
-  const rawBody = await response.text();
   let payload: { choices?: { message?: { content?: unknown } }[] };
   try {
     payload = JSON.parse(rawBody) as { choices?: { message?: { content?: unknown } }[] };
   } catch {
-    console.error("Ask WebLens AI received a non-JSON response", rawBody.slice(0, 200));
-    throw new Error("WebLens AI is unreachable right now. Please try again in a moment.");
+    console.error(
+      `[ask-weblens] ${provider.name} returned a non-JSON body: ${rawBody.slice(0, 400)}`,
+    );
+    throw new Error(`${provider.name} returned a non-JSON body`);
   }
+
   const content = payload.choices?.[0]?.message?.content;
   const answer = typeof content === "string" ? content.trim() : "";
-  if (!answer) throw new Error("WebLens AI returned an empty answer. Please try again.");
+  if (!answer) {
+    console.error(`[ask-weblens] ${provider.name} returned an empty answer.`);
+    throw new Error(`${provider.name} returned an empty answer`);
+  }
 
   return answer;
+}
+
+/**
+ * Asks the model. AgentRouter is tried first when configured; the Lovable AI
+ * gateway is the fallback so the assistant keeps working when AgentRouter is
+ * unreachable (it is currently behind a bot-protection page for server IPs).
+ */
+export async function askModel(brief: string, messages: AskMessage[]): Promise<string> {
+  const agentRouterKey = process.env["AGENTROUTER_API_KEY"];
+  const gatewayKey = process.env["LOVABLE_API_KEY"];
+
+  const providers: Provider[] = [];
+  if (agentRouterKey) {
+    providers.push({
+      name: "agentrouter",
+      url: AGENTROUTER_URL,
+      model: AGENTROUTER_MODEL,
+      key: agentRouterKey,
+    });
+  }
+  if (gatewayKey) {
+    providers.push({
+      name: "lovable-gateway",
+      url: GATEWAY_URL,
+      model: GATEWAY_MODEL,
+      key: gatewayKey,
+    });
+  }
+
+  if (providers.length === 0) {
+    console.error("[ask-weblens] No AI provider key configured.");
+    throw new Error("The assistant is not configured on this deployment.");
+  }
+
+  let lastError: unknown = null;
+  for (const provider of providers) {
+    try {
+      return await callProvider(provider, brief, messages);
+    } catch (error) {
+      lastError = error;
+      console.error(`[ask-weblens] provider ${provider.name} failed`, error);
+    }
+  }
+
+  console.error("[ask-weblens] all providers failed", lastError);
+  throw new Error("WebLens AI could not answer just now. Please try again.");
 }
