@@ -155,25 +155,31 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
     }
   }
 
+  // Rendered into <body> so no transformed ancestor can turn `fixed` into a
+  // scroll-bound element: the widget stays put at any scroll position.
+  const launcher = (
+    <button
+      ref={launcherRef}
+      type="button"
+      aria-label="Ask WebLens AI — drag to move"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      style={
+        position ? { left: position.x, top: position.y, right: "auto", bottom: "auto" } : undefined
+      }
+      className="fixed right-5 bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-40 inline-flex h-12 touch-none items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-shadow duration-(--motion-micro) hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none select-none sm:bottom-5 print:hidden"
+    >
+      <MessageSquareText className="size-4" aria-hidden />
+      Ask WebLens AI
+    </button>
+  );
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <button
-        ref={launcherRef}
-        type="button"
-        aria-label="Ask WebLens AI — drag to move"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        style={
-          position
-            ? { left: position.x, top: position.y, right: "auto", bottom: "auto" }
-            : undefined
-        }
-        className="fixed right-5 bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-40 inline-flex h-12 touch-none items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-shadow duration-(--motion-micro) hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none select-none sm:bottom-5 print:hidden"
-      >
-        <MessageSquareText className="size-4" aria-hidden />
-        Ask WebLens AI
-      </button>
+      {mounted ? createPortal(launcher, document.body) : null}
+
+
 
 
       <SheetContent
