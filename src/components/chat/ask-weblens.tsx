@@ -1,5 +1,6 @@
 import { MessageSquareText, Send, Lock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
   const launcherRef = useRef<HTMLButtonElement>(null);
   const dragState = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const context = useMemo(() => buildAskContext(report), [report]);
   const remaining = Math.max(0, FREE_MESSAGE_LIMIT - used);
@@ -63,6 +65,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
 
   // Restore this session's position and keep the widget on screen on resize.
   useEffect(() => {
+    setMounted(true);
     const stored = sessionStorage.getItem("weblens-ask-position");
     if (stored) {
       try {
