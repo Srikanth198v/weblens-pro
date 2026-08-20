@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
@@ -54,6 +54,15 @@ function NavItemButton({ item, className }: { item: NavItem; className?: string 
 export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
   const scrolled = useScrolled(40);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAnalyze = () => {
+    if (onAnalyzeClick) {
+      onAnalyzeClick();
+    } else {
+      navigate({ to: "/" });
+    }
+  };
 
   return (
     <header
@@ -85,7 +94,7 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
           ))}
           <Button
             className="ml-2 min-h-11 rounded-lg shadow-soft transition-all duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-card"
-            onClick={onAnalyzeClick}
+            onClick={handleAnalyze}
           >
             Analyze Website
           </Button>
@@ -95,7 +104,7 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
           <Button
             size="sm"
             className="min-h-11 rounded-lg px-4 shadow-soft transition-all duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-card"
-            onClick={onAnalyzeClick}
+            onClick={handleAnalyze}
           >
             Analyze
           </Button>
