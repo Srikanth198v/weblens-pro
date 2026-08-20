@@ -1,9 +1,10 @@
 import { MessageSquareText, Send, Lock } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { askUsage, askWebLens } from "@/lib/chat/ask.functions";
 import { FREE_MESSAGE_LIMIT, STARTER_QUESTIONS, type AskMessage } from "@/lib/chat/ask.shared";
@@ -24,6 +25,10 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
   const [used, setUsed] = useState(0);
   const [limitReached, setLimitReached] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const dragState = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const context = useMemo(() => buildAskContext(report), [report]);
   const remaining = Math.max(0, FREE_MESSAGE_LIMIT - used);
@@ -46,6 +51,76 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, pending]);
+
+  const clamp = useCallback((x: number, y: number) => {
+    const el = launcherRef.current;
+    const width = el?.offsetWidth ?? 160;
+    const height = el?.offsetHeight ?? 48;
+    const pad = 8;
+    return {
+      x: Math.min(Math.max(x, pad), Math.max(pad, window.innerWidth - width - pad)),
+      y: Math.min(Math.max(y, pad), Math.max(pad, window.innerHeight - height - pad)),
+    };
+  }, []);
+
+  // Restore this session's position and keep the widget on screen on resize.
+  useEffect(() => {
+    setMounted(true);
+    const stored = sessionStorage.getItem("weblens-ask-position");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { x: number; y: number };
+        if (typeof parsed.x === "number" && typeof parsed.y === "number") {
+          setPosition(clamp(parsed.x, parsed.y));
+        }
+      } catch {
+        /* ignore malformed stored position */
+      }
+    }
+    function onResize() {
+      setPosition((current) => (current ? clamp(current.x, current.y) : current));
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [clamp]);
+
+  function onPointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    dragState.current = {
+      dx: event.clientX - rect.left,
+      dy: event.clientY - rect.top,
+      moved: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLButtonElement>) {
+    const state = dragState.current;
+    if (!state) return;
+    const next = clamp(event.clientX - state.dx, event.clientY - state.dy);
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (!state.moved && Math.hypot(next.x - rect.left, next.y - rect.top) < 6) return;
+    state.moved = true;
+    setPosition(next);
+  }
+
+  function onPointerUp(event: React.PointerEvent<HTMLButtonElement>) {
+    const state = dragState.current;
+    dragState.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (state?.moved) {
+      setPosition((current) => {
+        if (current) {
+          sessionStorage.setItem("weblens-ask-position", JSON.stringify(current));
+        }
+        return current;
+      });
+      return;
+    }
+    setOpen(true);
+  }
 
   async function send(question: string) {
     const text = question.trim();
@@ -72,26 +147,43 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
         setError(result.message);
         setUsed(result.used);
         setMessages(messages);
+        setInput(text);
       }
     } catch {
       setError("WebLens AI could not answer just now. Your question is still here — try again.");
       setMessages(messages);
+      setInput(text);
     } finally {
       setPending(false);
     }
   }
 
+  // Rendered into <body> so no transformed ancestor can turn `fixed` into a
+  // scroll-bound element: the widget stays put at any scroll position.
+  const launcher = (
+    <button
+      ref={launcherRef}
+      type="button"
+      aria-label="Ask WebLens AI — drag to move"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      style={
+        position ? { left: position.x, top: position.y, right: "auto", bottom: "auto" } : undefined
+      }
+      className="fixed right-5 bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-50 inline-flex h-12 touch-none items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-shadow duration-(--motion-micro) hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none select-none sm:bottom-5 print:hidden"
+    >
+      <MessageSquareText className="size-4" aria-hidden />
+      Ask WebLens AI
+    </button>
+  );
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          size="lg"
-          className="fixed right-5 bottom-5 z-40 h-12 gap-2 rounded-full px-5 shadow-lg print:hidden"
-        >
-          <MessageSquareText className="size-4" aria-hidden />
-          Ask WebLens AI
-        </Button>
-      </SheetTrigger>
+      {mounted ? createPortal(launcher, document.body) : null}
+
+
+
 
       <SheetContent
         side="right"
