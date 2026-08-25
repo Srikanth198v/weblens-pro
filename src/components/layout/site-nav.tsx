@@ -104,6 +104,20 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
           {NAV_ITEMS.map((item) => (
             <NavItemButton key={item.label} item={item} />
           ))}
+          {session ? (
+            <button
+              type="button"
+              onClick={() => void handleSignOut()}
+              className={NAV_LINK_CLASS}
+              title={email ?? undefined}
+            >
+              Sign out{accountLabel ? ` (${accountLabel})` : ""}
+            </button>
+          ) : (
+            <Link to="/auth" className={NAV_LINK_CLASS} activeProps={{ className: "text-foreground" }}>
+              Sign In
+            </Link>
+          )}
           <Button
             className="ml-2 min-h-11 rounded-lg shadow-soft transition-all duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-card"
             onClick={handleAnalyze}
