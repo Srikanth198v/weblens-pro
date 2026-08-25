@@ -6,6 +6,9 @@ import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useScrolled } from "@/hooks/use-scrolled";
+import { useSession } from "@/hooks/use-session";
+import { supabase } from "@/integrations/supabase/client";
+import { resetCloudReports } from "@/lib/reports/cloud";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; comingSoon?: boolean };
@@ -20,7 +23,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Documentation" },
   { label: "About" },
   { label: "Pricing", comingSoon: true },
-  { label: "Sign In" },
 ];
 
 const NAV_LINK_CLASS =
