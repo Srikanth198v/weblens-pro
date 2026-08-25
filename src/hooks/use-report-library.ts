@@ -1,7 +1,17 @@
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
+import { useSession } from "@/hooks/use-session";
 import { buildDashboardReport } from "@/lib/dashboard/build-report";
 import type { DashboardReport } from "@/lib/dashboard/types";
+import {
+  deleteCloudReport,
+  getCloudReports,
+  getCloudReportsServerSnapshot,
+  refreshCloudReports,
+  resetCloudReports,
+  subscribeCloudReports,
+  toggleCloudFavorite,
+} from "@/lib/reports/cloud";
 import {
   deleteReport,
   getReports,
@@ -28,11 +38,34 @@ function sortEntries(entries: LibraryEntry[], sort: ReportSort): LibraryEntry[] 
 }
 
 /**
- * Subscribes to the stored report library and derives the dashboard model for
- * each entry once. Favourite and delete changes propagate instantly.
+ * Subscribes to the report library and derives the dashboard model for each
+ * entry once. Signed-in visitors read their account; everyone else reads the
+ * reports saved on this device.
  */
-export function useReportLibrary(options?: { search?: string; sort?: ReportSort; favoritesOnly?: boolean }) {
-  const saved = useSyncExternalStore(subscribeReports, getReports, getReportsServerSnapshot);
+export function useReportLibrary(options?: {
+  search?: string;
+  sort?: ReportSort;
+  favoritesOnly?: boolean;
+}) {
+  const { userId, loading: sessionLoading } = useSession();
+  const signedIn = Boolean(userId);
+
+  const local = useSyncExternalStore(subscribeReports, getReports, getReportsServerSnapshot);
+  const cloud = useSyncExternalStore(
+    subscribeCloudReports,
+    getCloudReports,
+    getCloudReportsServerSnapshot,
+  );
+
+  useEffect(() => {
+    if (!userId) {
+      resetCloudReports();
+      return;
+    }
+    void refreshCloudReports().catch(() => undefined);
+  }, [userId]);
+
+  const saved = signedIn ? cloud : local;
 
   const entries = useMemo<LibraryEntry[]>(
     () => saved.map((item) => ({ ...item, report: buildDashboardReport(item.result) })),
@@ -59,7 +92,21 @@ export function useReportLibrary(options?: { search?: string; sort?: ReportSort;
     all: entries,
     entries: visible,
     isEmpty: entries.length === 0,
-    onToggleFavorite: useCallback((id: string) => toggleFavorite(id), []),
-    onDelete: useCallback((id: string) => deleteReport(id), []),
+    signedIn,
+    loading: sessionLoading,
+    onToggleFavorite: useCallback(
+      (id: string) => {
+        if (signedIn) void toggleCloudFavorite(id).catch(() => undefined);
+        else toggleFavorite(id);
+      },
+      [signedIn],
+    ),
+    onDelete: useCallback(
+      (id: string) => {
+        if (signedIn) void deleteCloudReport(id).catch(() => undefined);
+        else deleteReport(id);
+      },
+      [signedIn],
+    ),
   };
 }
