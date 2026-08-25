@@ -6,6 +6,9 @@ import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useScrolled } from "@/hooks/use-scrolled";
+import { useSession } from "@/hooks/use-session";
+import { supabase } from "@/integrations/supabase/client";
+import { resetCloudReports } from "@/lib/reports/cloud";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; comingSoon?: boolean };
@@ -20,7 +23,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Documentation" },
   { label: "About" },
   { label: "Pricing", comingSoon: true },
-  { label: "Sign In" },
 ];
 
 const NAV_LINK_CLASS =
@@ -55,6 +57,7 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
   const scrolled = useScrolled(40);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { session, email } = useSession();
 
   const handleAnalyze = () => {
     if (onAnalyzeClick) {
@@ -63,6 +66,15 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
       navigate({ to: "/" });
     }
   };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    resetCloudReports();
+    setOpen(false);
+    void navigate({ to: "/", replace: true });
+  };
+
+  const accountLabel = email ? email.split("@")[0] : "";
 
   return (
     <header
@@ -92,6 +104,20 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
           {NAV_ITEMS.map((item) => (
             <NavItemButton key={item.label} item={item} />
           ))}
+          {session ? (
+            <button
+              type="button"
+              onClick={() => void handleSignOut()}
+              className={NAV_LINK_CLASS}
+              title={email ?? undefined}
+            >
+              Sign out{accountLabel ? ` (${accountLabel})` : ""}
+            </button>
+          ) : (
+            <Link to="/auth" className={NAV_LINK_CLASS} activeProps={{ className: "text-foreground" }}>
+              Sign In
+            </Link>
+          )}
           <Button
             className="ml-2 min-h-11 rounded-lg shadow-soft transition-all duration-(--motion-component) ease-(--motion-ease) hover:-translate-y-0.5 hover:shadow-card"
             onClick={handleAnalyze}
@@ -138,6 +164,24 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
                 {NAV_ITEMS.map((item) => (
                   <NavItemButton key={item.label} item={item} className="justify-start" />
                 ))}
+                {session ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleSignOut()}
+                    className={cn(NAV_LINK_CLASS, "justify-start")}
+                  >
+                    Sign out{accountLabel ? ` (${accountLabel})` : ""}
+                  </button>
+                ) : (
+                  <Link
+                    to="/auth"
+                    onClick={() => setOpen(false)}
+                    className={cn(NAV_LINK_CLASS, "justify-start")}
+                    activeProps={{ className: "text-foreground" }}
+                  >
+                    Sign In
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>

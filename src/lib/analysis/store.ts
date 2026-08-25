@@ -1,4 +1,5 @@
 import type { AnalysisResult } from "@/lib/analysis/types";
+import { saveCloudReport } from "@/lib/reports/cloud";
 import { saveReport } from "@/lib/reports/storage";
 
 /**
@@ -9,15 +10,23 @@ const KEY = "weblens:last-analysis";
 
 let inMemory: AnalysisResult | null = null;
 
-export function saveAnalysisResult(result: AnalysisResult) {
+/** Makes a report the one the dashboard, report page and Ask WebLens read. */
+export function setCurrentAnalysis(result: AnalysisResult) {
   inMemory = result;
   try {
     window.sessionStorage.setItem(KEY, JSON.stringify(result));
   } catch {
     // Storage unavailable — in-memory copy is enough for this session.
   }
+}
+
+export function saveAnalysisResult(result: AnalysisResult) {
+  setCurrentAnalysis(result);
   // Keep the report library in sync; saving the same analysis twice is a no-op.
   saveReport(result);
+  // Signed-in users get the report on their account too. Failures are silent:
+  // the analysis is already usable from this device.
+  void saveCloudReport(result).catch(() => undefined);
 }
 
 export function readAnalysisResult(): AnalysisResult | null {

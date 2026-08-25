@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      saved_reports: {
+        Row: {
+          category_scores: Json
+          confidence: number | null
+          created_at: string
+          favorite: boolean
+          id: string
+          overall_score: number
+          report_data: Json
+          site_category: string | null
+          site_name: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          category_scores?: Json
+          confidence?: number | null
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          overall_score?: number
+          report_data: Json
+          site_category?: string | null
+          site_name: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          category_scores?: Json
+          confidence?: number | null
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          overall_score?: number
+          report_data?: Json
+          site_category?: string | null
+          site_name?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
