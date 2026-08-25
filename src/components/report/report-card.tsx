@@ -4,7 +4,7 @@ import { Eye, Star, Trash2 } from "lucide-react";
 import { ScoreBadge } from "@/components/dashboard/score-badge";
 import { ScoreBar } from "@/components/dashboard/score-bar";
 import { Button } from "@/components/ui/button";
-import { saveAnalysisResult } from "@/lib/analysis/store";
+import { setCurrentAnalysis } from "@/lib/analysis/store";
 import { cn } from "@/lib/utils";
 import type { LibraryEntry } from "@/hooks/use-report-library";
 
@@ -22,7 +22,7 @@ export function ReportCard({
   const { report } = entry;
 
   const openReport = () => {
-    saveAnalysisResult(entry.result);
+    setCurrentAnalysis(entry.result);
     void navigate({ to: "/report" });
   };
 
