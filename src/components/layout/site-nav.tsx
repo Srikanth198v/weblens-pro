@@ -57,6 +57,7 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
   const scrolled = useScrolled(40);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { session, email } = useSession();
 
   const handleAnalyze = () => {
     if (onAnalyzeClick) {
@@ -65,6 +66,15 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
       navigate({ to: "/" });
     }
   };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    resetCloudReports();
+    setOpen(false);
+    void navigate({ to: "/", replace: true });
+  };
+
+  const accountLabel = email ? email.split("@")[0] : "";
 
   return (
     <header
