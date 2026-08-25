@@ -228,13 +228,17 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
             <div
               key={`${message.role}-${index}`}
               className={cn(
-                "text-sm leading-relaxed whitespace-pre-wrap",
+                "text-sm leading-relaxed",
                 message.role === "user"
                   ? "ml-auto max-w-[85%] rounded-2xl bg-primary px-4 py-2 text-primary-foreground"
                   : "text-foreground",
               )}
             >
-              {message.content}
+              {message.role === "assistant" ? (
+                <Markdown content={message.content} className="space-y-2 [&_li]:leading-relaxed [&_ul:first-child]:mt-0 [&_ol:first-child]:mt-0" />
+              ) : (
+                <span className="whitespace-pre-wrap">{message.content}</span>
+              )}
             </div>
           ))}
 
