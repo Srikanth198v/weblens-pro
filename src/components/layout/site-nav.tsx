@@ -164,6 +164,24 @@ export function SiteNav({ onAnalyzeClick }: { onAnalyzeClick?: () => void }) {
                 {NAV_ITEMS.map((item) => (
                   <NavItemButton key={item.label} item={item} className="justify-start" />
                 ))}
+                {session ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleSignOut()}
+                    className={cn(NAV_LINK_CLASS, "justify-start")}
+                  >
+                    Sign out{accountLabel ? ` (${accountLabel})` : ""}
+                  </button>
+                ) : (
+                  <Link
+                    to="/auth"
+                    onClick={() => setOpen(false)}
+                    className={cn(NAV_LINK_CLASS, "justify-start")}
+                    activeProps={{ className: "text-foreground" }}
+                  >
+                    Sign In
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>
