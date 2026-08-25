@@ -31,7 +31,7 @@ export function ReportsList({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<ReportSort>("newest");
 
-  const { entries, isEmpty, onToggleFavorite, onDelete } = useReportLibrary({
+  const { entries, isEmpty, signedIn, onToggleFavorite, onDelete } = useReportLibrary({
     search,
     sort,
     favoritesOnly,
@@ -39,12 +39,28 @@ export function ReportsList({
 
   const noneVisible = useMemo(() => entries.length === 0, [entries]);
 
+  const signInNotice = signedIn ? null : (
+    <p className="mb-6 rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-muted-foreground">
+      These reports are saved on this device.{" "}
+      <Link to="/auth" className="font-medium text-primary underline-offset-4 hover:underline">
+        Sign in
+      </Link>{" "}
+      to keep every analysis on your account.
+    </p>
+  );
+
   if (isEmpty) {
-    return <LibraryEmptyState title={emptyTitle} description={emptyDescription} />;
+    return (
+      <div>
+        {signInNotice}
+        <LibraryEmptyState title={emptyTitle} description={emptyDescription} />
+      </div>
+    );
   }
 
   return (
     <div>
+      {signInNotice}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search
