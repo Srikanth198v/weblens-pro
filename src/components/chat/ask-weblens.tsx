@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { askUsage, askWebLens } from "@/lib/chat/ask.functions";
+import { Markdown } from "@/components/chat/markdown";
 import { FREE_MESSAGE_LIMIT, STARTER_QUESTIONS, type AskMessage } from "@/lib/chat/ask.shared";
 import { buildAskContext } from "@/lib/chat/context";
 import type { DashboardReport } from "@/lib/dashboard/types";
