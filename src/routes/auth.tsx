@@ -15,9 +15,8 @@ const description =
   "Sign in to WebLens AI to keep every website analysis on your account and reopen any report whenever you need it.";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: search.mode === "signup" ? ("signup" as const) : ("signin" as const),
-  }),
+  validateSearch: (search: Record<string, unknown>): { mode?: "signin" | "signup" } =>
+    search.mode === "signup" ? { mode: "signup" } : {},
   head: () => ({
     meta: [
       { title },
