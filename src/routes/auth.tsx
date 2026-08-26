@@ -8,12 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSession } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
+import { getPendingAnalysis } from "@/lib/reports/pending";
 
 const title = "Sign in — WebLens AI";
 const description =
   "Sign in to WebLens AI to keep every website analysis on your account and reopen any report whenever you need it.";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: search.mode === "signup" ? ("signup" as const) : ("signin" as const),
+  }),
   head: () => ({
     meta: [
       { title },
@@ -33,14 +37,17 @@ type Mode = "signin" | "signup";
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useSession();
-  const [mode, setMode] = useState<Mode>("signin");
+  const { mode: initialMode } = Route.useSearch();
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [checkInbox, setCheckInbox] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) void navigate({ to: "/reports", replace: true });
+    if (!loading && session && !getPendingAnalysis()) {
+      void navigate({ to: "/reports", replace: true });
+    }
   }, [loading, navigate, session]);
 
   const submit = async (event: React.FormEvent) => {
@@ -63,8 +70,13 @@ function AuthPage() {
           password,
         });
         if (error) throw error;
-        toast.success("Signed in. Your reports are ready.");
-        void navigate({ to: "/reports" });
+        if (getPendingAnalysis()) {
+          // The claim hook attaches the pending analysis and opens the report.
+          toast.success("Signed in. Unlocking your report…");
+        } else {
+          toast.success("Signed in. Your reports are ready.");
+          void navigate({ to: "/reports" });
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
