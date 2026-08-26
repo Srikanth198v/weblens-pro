@@ -15,8 +15,10 @@ import { SectionNav } from "@/components/dashboard/section-nav";
 import { WebsitePreviewCard } from "@/components/dashboard/website-preview-card";
 import { WebsiteUnderstandingSection } from "@/components/dashboard/website-understanding";
 import { SiteNav } from "@/components/layout/site-nav";
+import { GuestGate } from "@/components/report/guest-gate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardReport } from "@/hooks/use-dashboard-report";
+import { useSession } from "@/hooks/use-session";
 import { useGptSummary } from "@/hooks/use-gpt-summary";
 import { buildAiUnderstanding } from "@/lib/analysis/ai-understanding";
 import { shareReport } from "@/lib/dashboard/export";
@@ -98,6 +100,8 @@ function SectionFallback() {
 
 function DashboardPage() {
   const state = useDashboardReport();
+  const { userId, loading: sessionLoading } = useSession();
+  const locked = !sessionLoading && !userId;
 
   return (
     <div className="min-h-screen bg-background">
@@ -116,7 +120,7 @@ function DashboardPage() {
         {state.status === "error" ? <DashboardErrorState onRetry={state.reload} /> : null}
 
         {state.status === "ready" ? (
-          <DashboardContent state={state} />
+          locked ? <GuestGate report={state.report} /> : <DashboardContent state={state} />
         ) : null}
       </main>
     </div>

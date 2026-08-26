@@ -79,12 +79,27 @@ export async function refreshCloudReports(): Promise<void> {
 
 /**
  * Persists a completed analysis to the signed-in user's account.
- * No-ops when nobody is signed in, so the local library keeps working.
+ * Returns false when nobody is signed in, so the caller can keep the result
+ * pending. Saving the same analysis twice is a no-op.
  */
-export async function saveCloudReport(result: AnalysisResult): Promise<void> {
+export async function saveCloudReport(result: AnalysisResult): Promise<boolean> {
   const { data: auth } = await supabase.auth.getUser();
   const user = auth.user;
-  if (!user) return;
+  if (!user) return false;
+
+  // Same address, same completion time = the same analysis. Never duplicate it.
+  const { data: existing } = await supabase
+    .from("saved_reports")
+    .select("id, report_data")
+    .eq("url", result.url);
+
+  const duplicate = ((existing ?? []) as unknown as Array<{ report_data: AnalysisResult }>).some(
+    (row) => row.report_data?.completedAt === result.completedAt,
+  );
+  if (duplicate) {
+    await refreshCloudReports();
+    return true;
+  }
 
   const classification = classifySite(result.evidence ?? null);
   const categoryScores = Object.fromEntries(
@@ -104,7 +119,49 @@ export async function saveCloudReport(result: AnalysisResult): Promise<void> {
 
   if (error) throw error;
   await refreshCloudReports();
+  return true;
 }
+
+/**
+ * Turns on a view-only public link for a report and returns its share token.
+ * The token is random and unguessable; the public read path never exposes the
+ * owner's account details.
+ */
+export async function enableCloudShare(id: string): Promise<string | null> {
+  const { data: existing, error: readError } = await supabase
+    .from("saved_reports")
+    .select("share_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError) return null;
+
+  const shareId = (existing as { share_id: string | null } | null)?.share_id ?? crypto.randomUUID();
+
+  const { error } = await supabase
+    .from("saved_reports")
+    .update({ share_id: shareId, share_enabled: true })
+    .eq("id", id);
+  if (error) return null;
+  return shareId;
+}
+
+/** Revokes a public link. The report itself is untouched. */
+export async function disableCloudShare(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("saved_reports")
+    .update({ share_enabled: false })
+    .eq("id", id);
+  return !error;
+}
+
+/** Loads a shared report through the public, read-only lookup. */
+export async function readSharedReport(shareId: string): Promise<AnalysisResult | null> {
+  const { data, error } = await supabase.rpc("get_shared_report", { _share_id: shareId });
+  if (error) return null;
+  const row = (data as unknown as Array<{ report_data: AnalysisResult }> | null)?.[0];
+  return row?.report_data?.url ? row.report_data : null;
+}
+
 
 export async function toggleCloudFavorite(id: string) {
   const current = cache.find((item) => item.id === id);

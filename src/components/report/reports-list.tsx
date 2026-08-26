@@ -101,6 +101,7 @@ export function ReportsList({
             <Reveal key={entry.id} delay={(index % 3) * 90} className="h-full">
               <ReportCard
                 entry={entry}
+                canShare={signedIn}
                 onToggleFavorite={onToggleFavorite}
                 onDelete={onDelete}
               />

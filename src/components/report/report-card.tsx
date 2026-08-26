@@ -1,29 +1,66 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Eye, Star, Trash2 } from "lucide-react";
+import { Eye, Share2, Star, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { ScoreBadge } from "@/components/dashboard/score-badge";
 import { ScoreBar } from "@/components/dashboard/score-bar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { setCurrentAnalysis } from "@/lib/analysis/store";
+import { enableCloudShare } from "@/lib/reports/cloud";
 import { cn } from "@/lib/utils";
 import type { LibraryEntry } from "@/hooks/use-report-library";
 
 /** A single saved report in history and favourites. */
 export function ReportCard({
   entry,
+  canShare = false,
   onToggleFavorite,
   onDelete,
 }: {
   entry: LibraryEntry;
+  canShare?: boolean;
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
   const navigate = useNavigate();
   const { report } = entry;
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const openReport = () => {
     setCurrentAnalysis(entry.result);
     void navigate({ to: "/report" });
+  };
+
+  const handleShare = async () => {
+    if (sharing) return;
+    setSharing(true);
+    const shareId = await enableCloudShare(entry.id);
+    setSharing(false);
+
+    if (!shareId) {
+      toast.error("We couldn't create that link just now. Try again in a moment.");
+      return;
+    }
+
+    const url = `${window.location.origin}/s/${shareId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("View-only link copied to your clipboard.");
+    } catch {
+      toast.success(`View-only link ready: ${url}`);
+    }
   };
 
   return (
@@ -56,6 +93,18 @@ export function ReportCard({
           <Eye aria-hidden="true" className="size-4" />
           Quick View
         </Button>
+        {canShare ? (
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-11 rounded-full"
+            disabled={sharing}
+            aria-label={`Copy a view-only link for ${report.siteName}`}
+            onClick={() => void handleShare()}
+          >
+            <Share2 aria-hidden="true" className="size-4" />
+          </Button>
+        ) : null}
         <Button
           variant="outline"
           size="icon"
@@ -74,7 +123,7 @@ export function ReportCard({
           size="icon"
           className="size-11 rounded-full"
           aria-label={`Delete report for ${report.siteName}`}
-          onClick={() => onDelete(entry.id)}
+          onClick={() => setConfirmOpen(true)}
         >
           <Trash2 aria-hidden="true" className="size-4" />
         </Button>
@@ -86,6 +135,30 @@ export function ReportCard({
       >
         Compare with another report
       </Link>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The report for {report.siteName} will be removed permanently, along with any view-only
+              link you shared. You can always run a fresh analysis.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-11 rounded-full">Keep report</AlertDialogCancel>
+            <AlertDialogAction
+              className="min-h-11 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                onDelete(entry.id);
+                toast.success("Report deleted.");
+              }}
+            >
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 }

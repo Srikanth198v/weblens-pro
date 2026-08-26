@@ -1,5 +1,6 @@
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { saveCloudReport } from "@/lib/reports/cloud";
+import { setPendingAnalysis } from "@/lib/reports/pending";
 import { saveReport } from "@/lib/reports/storage";
 
 /**
@@ -24,10 +25,15 @@ export function saveAnalysisResult(result: AnalysisResult) {
   setCurrentAnalysis(result);
   // Keep the report library in sync; saving the same analysis twice is a no-op.
   saveReport(result);
-  // Signed-in users get the report on their account too. Failures are silent:
-  // the analysis is already usable from this device.
-  void saveCloudReport(result).catch(() => undefined);
+  // Signed-in users get the report on their account. Guests keep it pending on
+  // this device until they sign in, then it is attached automatically.
+  void saveCloudReport(result)
+    .then((saved) => {
+      if (!saved) setPendingAnalysis(result);
+    })
+    .catch(() => setPendingAnalysis(result));
 }
+
 
 export function readAnalysisResult(): AnalysisResult | null {
   if (inMemory) return inMemory;

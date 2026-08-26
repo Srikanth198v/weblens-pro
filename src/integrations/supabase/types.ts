@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -23,6 +23,8 @@ export type Database = {
           id: string
           overall_score: number
           report_data: Json
+          share_enabled: boolean
+          share_id: string | null
           site_category: string | null
           site_name: string
           updated_at: string
@@ -37,6 +39,8 @@ export type Database = {
           id?: string
           overall_score?: number
           report_data: Json
+          share_enabled?: boolean
+          share_id?: string | null
           site_category?: string | null
           site_name: string
           updated_at?: string
@@ -51,6 +55,8 @@ export type Database = {
           id?: string
           overall_score?: number
           report_data?: Json
+          share_enabled?: boolean
+          share_id?: string | null
           site_category?: string | null
           site_name?: string
           updated_at?: string
@@ -64,7 +70,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_report: {
+        Args: { _share_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          overall_score: number
+          report_data: Json
+          site_name: string
+          url: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
