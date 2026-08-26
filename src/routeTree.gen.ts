@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as SShareIdRouteImport } from './routes/s.$shareId'
 import { Route as ReportsCompareRouteImport } from './routes/reports.compare'
 
 const ReportRoute = ReportRouteImport.update({
@@ -53,6 +54,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/reports/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SShareIdRoute = SShareIdRouteImport.update({
+  id: '/s/$shareId',
+  path: '/s/$shareId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsCompareRoute = ReportsCompareRouteImport.update({
   id: '/reports/compare',
   path: '/reports/compare',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/report': typeof ReportRoute
   '/reports/compare': typeof ReportsCompareRoute
+  '/s/$shareId': typeof SShareIdRoute
   '/reports/': typeof ReportsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/report': typeof ReportRoute
   '/reports/compare': typeof ReportsCompareRoute
+  '/s/$shareId': typeof SShareIdRoute
   '/reports': typeof ReportsIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/report': typeof ReportRoute
   '/reports/compare': typeof ReportsCompareRoute
+  '/s/$shareId': typeof SShareIdRoute
   '/reports/': typeof ReportsIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/report'
     | '/reports/compare'
+    | '/s/$shareId'
     | '/reports/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/report'
     | '/reports/compare'
+    | '/s/$shareId'
     | '/reports'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/report'
     | '/reports/compare'
+    | '/s/$shareId'
     | '/reports/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   ReportRoute: typeof ReportRoute
   ReportsCompareRoute: typeof ReportsCompareRoute
+  SShareIdRoute: typeof SShareIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/s/$shareId': {
+      id: '/s/$shareId'
+      path: '/s/$shareId'
+      fullPath: '/s/$shareId'
+      preLoaderRoute: typeof SShareIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports/compare': {
       id: '/reports/compare'
       path: '/reports/compare'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   ReportRoute: ReportRoute,
   ReportsCompareRoute: ReportsCompareRoute,
+  SShareIdRoute: SShareIdRoute,
   ReportsIndexRoute: ReportsIndexRoute,
 }
 export const routeTree = rootRouteImport
