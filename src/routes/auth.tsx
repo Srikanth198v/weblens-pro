@@ -37,7 +37,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useSession();
   const { mode: initialMode } = Route.useSearch();
-  const [mode, setMode] = useState<Mode>(initialMode);
+  const [mode, setMode] = useState<Mode>(initialMode ?? "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
