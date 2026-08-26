@@ -8,10 +8,12 @@ import { AskWebLens } from "@/components/chat/ask-weblens";
 import { EvidenceSummary } from "@/components/dashboard/evidence-summary";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { SiteNav } from "@/components/layout/site-nav";
+import { GuestGate } from "@/components/report/guest-gate";
 import { ExecutiveSummary } from "@/components/report/executive-summary";
 import { ReportHeader } from "@/components/report/report-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardReport } from "@/hooks/use-dashboard-report";
+import { useSession } from "@/hooks/use-session";
 import { buildReportView } from "@/lib/report/build-report-view";
 
 const MethodologySection = lazy(() =>
@@ -64,6 +66,8 @@ function SectionFallback() {
 
 function ReportPage() {
   const state = useDashboardReport();
+  const { userId, loading: sessionLoading } = useSession();
+  const locked = !sessionLoading && !userId;
 
   return (
     <div className="min-h-screen bg-background">
@@ -78,7 +82,9 @@ function ReportPage() {
 
         {state.status === "empty" ? <DashboardEmptyState /> : null}
         {state.status === "error" ? <DashboardErrorState onRetry={state.reload} /> : null}
-        {state.status === "ready" ? <ReportBody report={state.report} /> : null}
+        {state.status === "ready" ? (
+          locked ? <GuestGate report={state.report} /> : <ReportBody report={state.report} />
+        ) : null}
       </main>
     </div>
   );
