@@ -3,6 +3,7 @@ import { Copy, Download, FileText, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ShareReportControl } from "@/components/report/share-report-control";
 import { Button } from "@/components/ui/button";
 import { copyReport, downloadPdf, shareReport } from "@/lib/dashboard/export";
 import type { DashboardReport } from "@/lib/dashboard/types";
@@ -76,6 +77,8 @@ export function ExportArea({ report }: { report: DashboardReport }) {
           Share Report
         </Button>
       </div>
+
+      <ShareReportControl report={report} />
     </div>
   );
 }
