@@ -2,6 +2,7 @@ import { Braces, ClipboardList, Copy, Download, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ShareReportControl } from "@/components/report/share-report-control";
 import { Button } from "@/components/ui/button";
 import { downloadPdf, shareReport } from "@/lib/dashboard/export";
 import type { DashboardReport } from "@/lib/dashboard/types";
@@ -86,6 +87,8 @@ export function ExportCenter({ report }: { report: DashboardReport }) {
           onClick={() => run("json", () => downloadJson(report), "Report data downloaded.")}
         />
       </div>
+
+      <ShareReportControl report={report} />
     </div>
   );
 }
