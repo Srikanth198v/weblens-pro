@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -19,6 +20,11 @@ import { Route as ReportsIndexRouteImport } from './routes/reports.index'
 import { Route as SShareIdRouteImport } from './routes/s.$shareId'
 import { Route as ReportsCompareRouteImport } from './routes/reports.compare'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/report': typeof ReportRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/reports/compare': typeof ReportsCompareRoute
   '/s/$shareId': typeof SShareIdRoute
   '/reports/': typeof ReportsIndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/report': typeof ReportRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/reports/compare': typeof ReportsCompareRoute
   '/s/$shareId': typeof SShareIdRoute
   '/reports': typeof ReportsIndexRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/report': typeof ReportRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/reports/compare': typeof ReportsCompareRoute
   '/s/$shareId': typeof SShareIdRoute
   '/reports/': typeof ReportsIndexRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/favorites'
     | '/report'
+    | '/sitemap.xml'
     | '/reports/compare'
     | '/s/$shareId'
     | '/reports/'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/favorites'
     | '/report'
+    | '/sitemap.xml'
     | '/reports/compare'
     | '/s/$shareId'
     | '/reports'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/favorites'
     | '/report'
+    | '/sitemap.xml'
     | '/reports/compare'
     | '/s/$shareId'
     | '/reports/'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   FavoritesRoute: typeof FavoritesRoute
   ReportRoute: typeof ReportRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ReportsCompareRoute: typeof ReportsCompareRoute
   SShareIdRoute: typeof SShareIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -149,6 +162,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/report': {
       id: '/report'
       path: '/report'
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   FavoritesRoute: FavoritesRoute,
   ReportRoute: ReportRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ReportsCompareRoute: ReportsCompareRoute,
   SShareIdRoute: SShareIdRoute,
   ReportsIndexRoute: ReportsIndexRoute,
