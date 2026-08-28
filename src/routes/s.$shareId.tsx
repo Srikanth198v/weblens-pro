@@ -56,7 +56,7 @@ function SharedReportPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="safe-x mx-auto flex h-16 w-full max-w-[76rem] items-center justify-between px-5 sm:px-8">
+      <header className="page-container flex h-16 items-center justify-between">
         <BrandMark />
         <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted-foreground">
           View only
@@ -65,7 +65,7 @@ function SharedReportPage() {
 
       <main
         id="main-content"
-        className="motion-page-enter safe-x mx-auto w-full max-w-[76rem] px-5 pb-28 sm:px-8"
+        className="motion-page-enter page-container pb-28"
       >
         {state.status === "loading" ? (
           <div className="space-y-4" aria-busy="true">

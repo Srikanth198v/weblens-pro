@@ -72,7 +72,7 @@ function ReportPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
-      <main id="main-content" className="motion-page-enter safe-x mx-auto w-full max-w-[76rem] px-5 pt-24 pb-28 sm:px-8 sm:pt-28">
+      <main id="main-content" className="motion-page-enter page-container pt-24 pb-28 sm:pt-28">
         {state.status === "loading" ? (
           <div className="space-y-4" aria-busy="true">
             <Skeleton className="h-72 w-full rounded-3xl" />
