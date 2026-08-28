@@ -1,8 +1,22 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /analysis
+Disallow: /dashboard
+Disallow: /report
+Disallow: /reports
+Disallow: /favorites
+Disallow: /auth
+Disallow: /s/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /analysis
+Disallow: /dashboard
+Disallow: /report
+Disallow: /reports
+Disallow: /favorites
+Disallow: /auth
+Disallow: /s/
 
 User-agent: Twitterbot
 Allow: /
@@ -17,3 +31,7 @@ Disallow: /dashboard
 Disallow: /report
 Disallow: /reports
 Disallow: /favorites
+Disallow: /auth
+Disallow: /s/
+
+Sitemap: https://weblensai.lovable.app/sitemap.xml
