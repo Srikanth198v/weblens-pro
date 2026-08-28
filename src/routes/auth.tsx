@@ -94,7 +94,7 @@ function AuthPage() {
       <SiteNav />
       <main
         id="main-content"
-        className="motion-page-enter safe-x mx-auto flex w-full max-w-[28rem] flex-col px-5 pt-28 pb-28 sm:px-8"
+        className="motion-page-enter page-container page-container-narrow flex flex-col pt-28 pb-28"
       >
         <header className="pb-8 text-center">
           <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">Account</p>

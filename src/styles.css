@@ -475,9 +475,40 @@
  * Production polish (Phase 6.5)
  * Safe-area padding for notched phones, long-URL wrapping and print rules.
  */
-@utility safe-x {
-  padding-left: max(0px, env(safe-area-inset-left));
-  padding-right: max(0px, env(safe-area-inset-right));
+
+/*
+ * Single global content container.
+ *
+ * Every page shell, nav row and section uses this so headings, labels,
+ * descriptions, buttons and cards all sit on the same alignment grid.
+ * Gutters grow with the viewport and always clear the notch safe area.
+ */
+@utility page-container {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 76rem;
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+
+  @media (min-width: 640px) {
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
+  }
+
+  @media (min-width: 1024px) {
+    padding-left: max(2.5rem, env(safe-area-inset-left));
+    padding-right: max(2.5rem, env(safe-area-inset-right));
+  }
+}
+
+/** Same gutters, wider measure — used by the nav and hero only. */
+@utility page-container-wide {
+  max-width: 80rem;
+}
+
+/** Narrow single-column pages (auth) keep the shared gutters. */
+@utility page-container-narrow {
+  max-width: 28rem;
 }
 
 @utility safe-bottom {
