@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics/track";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { saveCloudReport } from "@/lib/reports/cloud";
 import { setPendingAnalysis } from "@/lib/reports/pending";
@@ -25,6 +26,7 @@ export function saveAnalysisResult(result: AnalysisResult) {
   setCurrentAnalysis(result);
   // Keep the report library in sync; saving the same analysis twice is a no-op.
   saveReport(result);
+  track("report_saved");
   // Signed-in users get the report on their account. Guests keep it pending on
   // this device until they sign in, then it is attached automatically.
   void saveCloudReport(result)
