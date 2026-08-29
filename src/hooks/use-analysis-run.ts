@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { track } from "@/lib/analytics/track";
 import { liveAnalysisEngine } from "@/lib/analysis/live-engine";
 import { STATUS_MESSAGES, stageForPercent } from "@/lib/analysis/stages";
 import { saveAnalysisResult } from "@/lib/analysis/store";
