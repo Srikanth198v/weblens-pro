@@ -34,12 +34,17 @@ export const askWebLens = createServerFn({ method: "POST" })
         remaining: Math.max(0, FREE_MESSAGE_LIMIT - nextUsed),
       };
     } catch (error) {
+      // Log the detail server-side; send the visitor a plain, non-technical
+      // message so no provider, key or stack detail reaches the browser.
       console.error("Ask WebLens AI error", error);
+      const detail = error instanceof Error ? error.message : "";
+      const rateLimited = /429|rate limit|quota/i.test(detail);
       return {
         ok: false,
         reason: "error",
-        message:
-          error instanceof Error ? error.message : "WebLens AI could not answer just now.",
+        message: rateLimited
+          ? "WebLens AI is handling a lot of questions right now. Wait a few seconds and send it again — this one didn't use a free question."
+          : "WebLens AI couldn't answer just now. Your question is still here — try again in a moment.",
         used,
         remaining: Math.max(0, FREE_MESSAGE_LIMIT - used),
       };
