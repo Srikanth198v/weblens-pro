@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/hooks/use-session";
+import { track } from "@/lib/analytics/track";
 import type { DashboardReport } from "@/lib/dashboard/types";
 import {
   findShareState,
