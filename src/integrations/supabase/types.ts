@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      product_events: {
+        Row: {
+          anon_id: string | null
+          created_at: string
+          event: string
+          id: string
+          path: string | null
+        }
+        Insert: {
+          anon_id?: string | null
+          created_at?: string
+          event: string
+          id?: string
+          path?: string | null
+        }
+        Update: {
+          anon_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          path?: string | null
+        }
+        Relationships: []
+      }
       saved_reports: {
         Row: {
           category_scores: Json
