@@ -10,6 +10,7 @@ import { askUsage, askWebLens } from "@/lib/chat/ask.functions";
 import { Markdown } from "@/components/chat/markdown";
 import { FREE_MESSAGE_LIMIT, STARTER_QUESTIONS, type AskMessage } from "@/lib/chat/ask.shared";
 import { buildAskContext } from "@/lib/chat/context";
+import { useSession } from "@/hooks/use-session";
 import { track } from "@/lib/analytics/track";
 import type { DashboardReport } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
@@ -31,12 +32,14 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
   const dragState = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [mounted, setMounted] = useState(false);
+  const { userId, loading: sessionLoading } = useSession();
+  const signedIn = Boolean(userId);
 
   const context = useMemo(() => buildAskContext(report), [report]);
   const remaining = Math.max(0, FREE_MESSAGE_LIMIT - used);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !signedIn) return;
     track("ask_opened");
     let active = true;
     void askUsage()
@@ -49,7 +52,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
     return () => {
       active = false;
     };
-  }, [open]);
+  }, [open, signedIn]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -127,7 +130,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
 
   async function send(question: string) {
     const text = question.trim();
-    if (!text || pending || limitReached) return;
+    if (!text || pending || limitReached || !signedIn) return;
 
     const next: AskMessage[] = [...messages, { role: "user", content: text }];
     setMessages(next);
@@ -205,9 +208,15 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
           <p className="text-xs text-muted-foreground">
             Answers come from this analysis of {report.siteName} — measured evidence only.
           </p>
-          <p className="text-xs font-medium text-primary">
-            {remaining} of {FREE_MESSAGE_LIMIT} free questions remaining
-          </p>
+          {signedIn ? (
+            <p className="text-xs font-medium text-primary">
+              {remaining} of {FREE_MESSAGE_LIMIT} free questions remaining
+            </p>
+          ) : (
+            <p className="text-xs font-medium text-primary">
+              {FREE_MESSAGE_LIMIT} free questions come with your account
+            </p>
+          )}
         </SheetHeader>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
@@ -221,7 +230,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
                   <button
                     key={question}
                     type="button"
-                    disabled={pending || limitReached}
+                    disabled={pending || limitReached || !signedIn}
                     onClick={() => void send(question)}
                     className="rounded-full border border-border px-3 py-2 text-left text-xs font-medium text-foreground transition-colors duration-(--motion-micro) hover:border-primary hover:text-primary disabled:opacity-50"
                   >
@@ -257,6 +266,22 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
           {error ? (
             <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm text-foreground">
               {error}
+            </div>
+          ) : null}
+
+          {!signedIn && !sessionLoading ? (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Lock className="size-4 text-primary" aria-hidden />
+                Sign in to ask WebLens AI
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Your {FREE_MESSAGE_LIMIT} free questions belong to your account, so they follow you
+                on every device.
+              </p>
+              <Button asChild className="mt-3 w-full">
+                <a href="/auth">Sign in</a>
+              </Button>
             </div>
           ) : null}
 
@@ -296,11 +321,15 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
                   void send(input);
                 }
               }}
-              disabled={pending || limitReached}
+              disabled={pending || limitReached || !signedIn}
               rows={2}
               aria-label="Ask a question about this report"
               placeholder={
-                limitReached ? "Free questions used up" : "Ask about this report…"
+                !signedIn
+                  ? "Sign in to ask WebLens AI"
+                  : limitReached
+                    ? "Free questions used up"
+                    : "Ask about this report…"
               }
               className="min-h-11 resize-none"
             />
@@ -308,7 +337,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
               type="submit"
               size="icon"
               className="size-11 shrink-0"
-              disabled={pending || limitReached || !input.trim()}
+              disabled={pending || limitReached || !signedIn || !input.trim()}
               aria-label="Send question"
             >
               <Send className="size-4" aria-hidden />

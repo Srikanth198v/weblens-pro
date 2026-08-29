@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      ask_usage: {
+        Row: {
+          created_at: string
+          updated_at: string
+          used: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          updated_at?: string
+          used?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          updated_at?: string
+          used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_events: {
         Row: {
           anon_id: string | null
@@ -94,6 +115,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_ask_question: { Args: { _limit: number }; Returns: number }
+      get_ask_usage: { Args: never; Returns: number }
       get_shared_report: {
         Args: { _share_id: string }
         Returns: {
@@ -105,6 +128,7 @@ export type Database = {
           url: string
         }[]
       }
+      refund_ask_question: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
