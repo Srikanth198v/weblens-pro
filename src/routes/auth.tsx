@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSession } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
+import { track } from "@/lib/analytics/track";
 import { getPendingAnalysis } from "@/lib/reports/pending";
 
 const title = "Sign in — WebLens AI";
@@ -62,6 +63,7 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        track("signup_completed");
         setCheckInbox(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({

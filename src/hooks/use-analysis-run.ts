@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { track } from "@/lib/analytics/track";
 import { liveAnalysisEngine } from "@/lib/analysis/live-engine";
 import { STATUS_MESSAGES, stageForPercent } from "@/lib/analysis/stages";
 import { saveAnalysisResult } from "@/lib/analysis/store";
@@ -37,6 +38,7 @@ export function useAnalysisRun(url: string, engine: AnalysisEngine = liveAnalysi
     setPercent(0);
     setStageId("connecting");
     setResult(null);
+    track("analysis_started");
 
     const rotate = window.setInterval(() => {
       setMessageIndex((index) => (index + 1) % STATUS_MESSAGES.length);
@@ -59,10 +61,12 @@ export function useAnalysisRun(url: string, engine: AnalysisEngine = liveAnalysi
         setResult(analysis);
         saveAnalysisResult(analysis);
         setStatus("complete");
+        track("analysis_completed");
       })
       .catch(() => {
         if (!active || controller.signal.aborted) return;
         setStatus("failed");
+        track("analysis_failed");
       })
       .finally(() => {
         window.clearInterval(rotate);

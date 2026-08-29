@@ -10,6 +10,7 @@ import { askUsage, askWebLens } from "@/lib/chat/ask.functions";
 import { Markdown } from "@/components/chat/markdown";
 import { FREE_MESSAGE_LIMIT, STARTER_QUESTIONS, type AskMessage } from "@/lib/chat/ask.shared";
 import { buildAskContext } from "@/lib/chat/context";
+import { track } from "@/lib/analytics/track";
 import type { DashboardReport } from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
 
   useEffect(() => {
     if (!open) return;
+    track("ask_opened");
     let active = true;
     void askUsage()
       .then((usage) => {
@@ -138,6 +140,7 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
 
       if (result.ok) {
         setMessages([...next, { role: "assistant", content: result.answer }]);
+        track("ask_answered");
         setUsed(result.used);
         setLimitReached(result.remaining === 0);
       } else if (result.reason === "limit") {
@@ -151,7 +154,11 @@ export function AskWebLens({ report }: { report: DashboardReport }) {
         setInput(text);
       }
     } catch {
-      setError("WebLens AI could not answer just now. Your question is still here — try again.");
+      setError(
+        typeof navigator !== "undefined" && navigator.onLine === false
+          ? "You appear to be offline. Your question is saved here — reconnect and send it again."
+          : "WebLens AI could not answer just now. Your question is still here — try again.",
+      );
       setMessages(messages);
       setInput(text);
     } finally {

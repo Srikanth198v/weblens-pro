@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/hooks/use-session";
+import { track } from "@/lib/analytics/track";
 import type { DashboardReport } from "@/lib/dashboard/types";
 import {
   findShareState,
@@ -77,6 +78,7 @@ export function ShareReportControl({ report }: { report: DashboardReport }) {
         return;
       }
       setState({ ...state, shareId, enabled: true });
+      track("report_shared");
       try {
         await navigator.clipboard.writeText(shareUrlFor(shareId));
         toast.success("Public link created and copied to your clipboard.");
