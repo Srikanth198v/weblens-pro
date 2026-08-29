@@ -128,6 +128,7 @@ export type Database = {
           url: string
         }[]
       }
+      refund_ask_question: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
