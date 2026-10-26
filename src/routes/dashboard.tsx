@@ -31,6 +31,11 @@ const DetailedAnalysis = lazy(() =>
     default: module.DetailedAnalysis,
   })),
 );
+const FindingsExplorer = lazy(() =>
+  import("@/components/dashboard/findings-explorer").then((module) => ({
+    default: module.FindingsExplorer,
+  })),
+);
 const BusinessReview = lazy(() =>
   import("@/components/dashboard/business-review").then((module) => ({
     default: module.BusinessReview,
@@ -257,6 +262,7 @@ function DashboardContent({
         description="Open any area to see what is working, what isn't, and what to do next."
       >
         <Suspense fallback={<SectionFallback />}>
+          <FindingsExplorer categories={report.categories} url={report.displayUrl} />
           <DetailedAnalysis categories={report.categories} />
         </Suspense>
       </DashboardSection>

@@ -18,9 +18,13 @@ export type ScoreStatus = "excellent" | "good" | "needs-improvement";
 export type CategoryId = "design" | "performance" | "seo" | "accessibility" | "business";
 
 export type CategoryFactor = {
+  /** Stable check id. Optional for reports saved before it existed. */
+  id?: string;
   label: string;
   detail: string;
   verdict: "pass" | "warn" | "fail";
+  /** Measured-based fix, present when the check did not pass. */
+  improvement?: string;
 };
 
 export type CategoryDetail = {

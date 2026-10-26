@@ -230,9 +230,11 @@ function categoriesFrom(
     summary: category.summary,
     measured: category.measured,
     factors: category.factors.map((factor) => ({
+      id: factor.id,
       label: factor.label,
       detail: factor.detail,
       verdict: factor.verdict,
+      improvement: factor.improvement,
     })),
     whyThisScore: category.whyThisScore,
     biggestFactor: category.biggestFactor,
