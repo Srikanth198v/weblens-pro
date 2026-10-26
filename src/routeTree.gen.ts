@@ -9,40 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ReportRouteImport } from './routes/report'
-import { Route as FavoritesRouteImport } from './routes/favorites'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalysisRouteImport } from './routes/analysis'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
-import { Route as SShareIdRouteImport } from './routes/s.$shareId'
 import { Route as ReportsCompareRouteImport } from './routes/reports.compare'
+import { Route as SShareIdRouteImport } from './routes/s.$shareId'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportRoute = ReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FavoritesRoute = FavoritesRouteImport.update({
-  id: '/favorites',
-  path: '/favorites',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalysisRoute = AnalysisRouteImport.update({
@@ -50,9 +30,29 @@ const AnalysisRoute = AnalysisRouteImport.update({
   path: '/analysis',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsIndexRoute = ReportsIndexRouteImport.update({
@@ -60,14 +60,14 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/reports/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SShareIdRoute = SShareIdRouteImport.update({
-  id: '/s/$shareId',
-  path: '/s/$shareId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReportsCompareRoute = ReportsCompareRouteImport.update({
   id: '/reports/compare',
   path: '/reports/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SShareIdRoute = SShareIdRouteImport.update({
+  id: '/s/$shareId',
+  path: '/s/$shareId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -162,39 +162,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/report': {
-      id: '/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favorites': {
-      id: '/favorites'
-      path: '/favorites'
-      fullPath: '/favorites'
-      preLoaderRoute: typeof FavoritesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analysis': {
@@ -204,11 +176,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/': {
@@ -218,18 +218,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/s/$shareId': {
-      id: '/s/$shareId'
-      path: '/s/$shareId'
-      fullPath: '/s/$shareId'
-      preLoaderRoute: typeof SShareIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/reports/compare': {
       id: '/reports/compare'
       path: '/reports/compare'
       fullPath: '/reports/compare'
       preLoaderRoute: typeof ReportsCompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$shareId': {
+      id: '/s/$shareId'
+      path: '/s/$shareId'
+      fullPath: '/s/$shareId'
+      preLoaderRoute: typeof SShareIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
