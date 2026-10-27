@@ -262,7 +262,7 @@ function DashboardContent({
         description="Open any area to see what is working, what isn't, and what to do next."
       >
         <Suspense fallback={<SectionFallback />}>
-          <FindingsExplorer categories={report.categories} url={report.displayUrl} />
+          <FindingsExplorer categories={report.categories} url={report.displayUrl} recommendations={report.recommendations} />
           <DetailedAnalysis categories={report.categories} />
         </Suspense>
       </DashboardSection>

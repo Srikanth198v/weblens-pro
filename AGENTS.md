@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Findings guidance joins measured check IDs to existing report recommendation IDs; never generate new advice or change scores in the presentation layer.

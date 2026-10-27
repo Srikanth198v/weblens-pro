@@ -1,4 +1,4 @@
-import type { CategoryDetail, CategoryFactor } from "@/lib/dashboard/types";
+import type { CategoryDetail, CategoryFactor, Recommendation } from "@/lib/dashboard/types";
 
 /**
  * Findings view: re-groups the already-measured checks into five report
@@ -17,6 +17,8 @@ export type Finding = {
   affected: string;
   evidence: string;
   fix: string | null;
+  /** Existing report advice, matched only to this measured check. */
+  recommendation: Recommendation | null;
 };
 
 export const AREA_LABEL: Record<FindingArea, string> = {
@@ -62,7 +64,8 @@ const AFFECTED: Record<string, string> = {
 };
 
 function areaFor(categoryId: CategoryDetail["id"], factor: CategoryFactor): FindingArea | null {
-  if (factor.id && AREA_OVERRIDE[factor.id]) return AREA_OVERRIDE[factor.id]!;
+  const override = factor.id ? AREA_OVERRIDE[factor.id] : undefined;
+  if (override) return override;
   if (categoryId === "seo" || categoryId === "performance" || categoryId === "accessibility") {
     return categoryId;
   }
@@ -77,7 +80,12 @@ const SEVERITY: Record<CategoryFactor["verdict"], FindingSeverity> = {
 
 const ORDER: Record<FindingSeverity, number> = { critical: 0, warning: 1, passed: 2 };
 
-export function buildFindings(categories: CategoryDetail[], pageUrl: string): Finding[] {
+export function buildFindings(
+  categories: CategoryDetail[],
+  pageUrl: string,
+  recommendations: Recommendation[] = [],
+): Finding[] {
+  const adviceById = new Map(recommendations.map((item) => [item.id, item]));
   const findings: Finding[] = [];
   for (const category of categories) {
     category.factors.forEach((factor, index) => {
@@ -92,8 +100,17 @@ export function buildFindings(categories: CategoryDetail[], pageUrl: string): Fi
         affected: `${(factor.id && AFFECTED[factor.id]) || "Page"} — ${pageUrl}`,
         evidence: factor.detail,
         fix: severity === "passed" ? null : (factor.improvement ?? null),
+        recommendation: severity !== "passed" && factor.id ? (adviceById.get(factor.id) ?? null) : null,
       });
     });
   }
   return findings.sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
+}
+
+/** Plain text for copying this finding's existing guidance, not report contents. */
+export function findingFixText(finding: Finding): string | null {
+  if (finding.severity === "passed") return null;
+  const steps = finding.recommendation?.howToFix ?? (finding.fix ? [finding.fix] : []);
+  if (!steps.length) return null;
+  return [finding.title, ...steps.map((step, index) => `${index + 1}. ${step}`)].join("\n");
 }

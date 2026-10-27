@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
+import { ChevronDown, Copy } from "lucide-react";
+import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AREA_LABEL, buildFindings, type FindingArea, type FindingSeverity } from "@/lib/dashboard/findings";
-import type { CategoryDetail } from "@/lib/dashboard/types";
+import { AREA_LABEL, buildFindings, findingFixText, type FindingArea, type FindingSeverity } from "@/lib/dashboard/findings";
+import type { CategoryDetail, Recommendation } from "@/lib/dashboard/types";
 
 const SEVERITY_LABEL: Record<FindingSeverity, string> = {
   critical: "Critical",
@@ -19,8 +22,12 @@ const SEVERITY_STYLE: Record<FindingSeverity, string> = {
 const AREAS = Object.keys(AREA_LABEL) as FindingArea[];
 
 /** Measured findings grouped into five report areas, with severity and fixes. */
-export function FindingsExplorer({ categories, url }: { categories: CategoryDetail[]; url: string }) {
-  const findings = useMemo(() => buildFindings(categories, url), [categories, url]);
+export function FindingsExplorer({ categories, url, recommendations = [] }: {
+  categories: CategoryDetail[];
+  url: string;
+  recommendations?: Recommendation[];
+}) {
+  const findings = useMemo(() => buildFindings(categories, url, recommendations), [categories, url, recommendations]);
   const [area, setArea] = useState<FindingArea>("seo");
   const [hidePassed, setHidePassed] = useState(false);
 
@@ -48,7 +55,8 @@ export function FindingsExplorer({ categories, url }: { categories: CategoryDeta
         {AREAS.map((id) => {
           const issues = findings.filter((f) => f.area === id && f.severity !== "passed").length;
           return (
-            <button
+            <Button
+              variant="ghost"
               key={id}
               role="tab"
               aria-selected={area === id}
@@ -62,7 +70,7 @@ export function FindingsExplorer({ categories, url }: { categories: CategoryDeta
             >
               {AREA_LABEL[id]}
               <span className="ml-1.5 tabular-nums opacity-80">({issues})</span>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -102,6 +110,52 @@ export function FindingsExplorer({ categories, url }: { categories: CategoryDeta
                   </>
                 ) : null}
               </dl>
+              {f.severity !== "passed" && (f.recommendation || f.fix) ? (
+                <details className="group mt-4 border-t border-border pt-3">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-sm font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                    How to fix
+                    <ChevronDown aria-hidden="true" className="size-4 shrink-0 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
+                  </summary>
+                  <div className="space-y-4 pt-3">
+                    {f.recommendation ? (
+                      <>
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                          <span>Impact: <strong className="font-medium text-foreground">{f.recommendation.impact}</strong></span>
+                          <span>Effort: <strong className="font-medium text-foreground">{f.recommendation.difficulty}</strong></span>
+                          <span>Estimated time: <strong className="font-medium text-foreground">{f.recommendation.estimatedTime}</strong></span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Why it matters</p>
+                          <p className="mt-1 text-sm text-muted-foreground">{f.recommendation.whyItMatters}</p>
+                        </div>
+                      </>
+                    ) : null}
+                    <ol className="list-decimal space-y-2 pl-5 text-sm text-foreground/85">
+                      {(f.recommendation?.howToFix ?? (f.fix ? [f.fix] : [])).map((step, index) => (
+                        <li key={`${f.id}-step-${index}`} className="break-words pl-1">{step}</li>
+                      ))}
+                    </ol>
+                    <Button
+                      variant="outline"
+                      className="min-h-11"
+                      aria-label={`Copy fix for ${f.title}`}
+                      onClick={async () => {
+                        const text = findingFixText(f);
+                        if (!text) return;
+                        try {
+                          await navigator.clipboard.writeText(text);
+                          toast.success("Fix steps copied");
+                        } catch {
+                          toast.error("Couldn't copy the steps. Select the steps and copy them manually.");
+                        }
+                      }}
+                    >
+                      <Copy aria-hidden="true" /> Copy fix
+                    </Button>
+                    <p className="text-xs text-muted-foreground">Suggested steps, not applied changes. Re-analyze the website after updating it to verify the result.</p>
+                  </div>
+                </details>
+              ) : null}
             </li>
           ))}
         </ul>
