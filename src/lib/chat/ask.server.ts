@@ -11,7 +11,7 @@ import type { AskMessage } from "@/lib/chat/ask.shared";
 const AGENTROUTER_URL = "https://agentrouter.org/v1/chat/completions";
 const AGENTROUTER_MODEL = "gpt-5.6-sol";
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const GATEWAY_MODEL = "google/gemini-3-flash-preview";
+const GATEWAY_MODEL = "openai/gpt-5.6-sol";
 
 export const SYSTEM_PROMPT = `You are WebLens AI, the in-product analysis assistant. You are never "ChatGPT" or "OpenAI" — you are WebLens AI.
 
@@ -144,7 +144,7 @@ export async function askModel(brief: string, messages: AskMessage[]): Promise<s
   const gatewayKey = process.env["LOVABLE_API_KEY"];
 
   const providers: Provider[] = [];
-  if (agentRouterKey) {
+  if (agentRouterKey && process.env["USE_AGENTROUTER"] === "1") {
     providers.push({
       name: "agentrouter",
       url: AGENTROUTER_URL,
