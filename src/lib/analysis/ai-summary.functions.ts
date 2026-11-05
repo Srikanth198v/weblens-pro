@@ -8,8 +8,8 @@ import { createServerFn } from "@tanstack/react-start";
  * existing rule-based summary.
  */
 
-const BASE_URL = "https://agentrouter.org/v1";
-const MODEL = "gpt-5.6-sol";
+const BASE_URL = "https://ai.gateway.lovable.dev/v1";
+const MODEL = "openai/gpt-5.6-sol";
 const TIMEOUT_MS = 12_000;
 
 export type GptSummaryPayload = {
@@ -107,7 +107,7 @@ function validate(input: unknown): GptSummaryPayload {
 export const generateAiSummary = createServerFn({ method: "POST" })
   .inputValidator(validate)
   .handler(async ({ data }): Promise<GptSummaryResult> => {
-    const apiKey = process.env["AGENTROUTER_API_KEY"];
+    const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) return { ok: false, reason: "missing-key" };
 
     const facts = [
