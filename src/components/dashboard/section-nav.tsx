@@ -18,6 +18,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { useActiveSection } from "@/hooks/use-active-section";
 import { DASHBOARD_SECTIONS, DASHBOARD_SECTION_IDS } from "@/lib/dashboard/sections";
 import { cn } from "@/lib/utils";
@@ -52,7 +55,11 @@ export function SectionNav() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       <nav
         aria-label="Dashboard sections"
@@ -83,7 +90,7 @@ export function SectionNav() {
 
       <nav
         aria-label="Dashboard sections"
-        className="safe-bottom fixed inset-x-3 bottom-3 z-30 rounded-2xl border border-border bg-card/90 p-1.5 shadow-lifted backdrop-blur-md xl:hidden print:hidden"
+        className="safe-bottom fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-border bg-card/90 p-1.5 shadow-lifted backdrop-blur-md xl:hidden print:hidden"
       >
 
         <ul className="flex snap-x gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -111,6 +118,7 @@ export function SectionNav() {
           })}
         </ul>
       </nav>
-    </>
+    </>,
+    document.body,
   );
 }
